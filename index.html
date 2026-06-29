@@ -446,14 +446,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- PROFILE TAB -->
 <div id="tabProfile" style="padding-bottom:72px">
-  <div style="position:relative;height:260px;overflow:hidden">
-    <img id="profileBanner" src="https://i.ibb.co/zWwZsRb6/IMG-3724.jpg" alt="Banner"
-      style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;filter:blur(3px);transform:scale(1.08)"/>
-    <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.15) 0%,rgba(30,27,75,0.7) 60%,rgba(30,27,75,0.92) 100%)"></div>
-    <div style="position:absolute;bottom:0;left:0;right:0;padding:20px;text-align:center">
-      <div class="profile-avatar" id="profileAvatar" style="border:4px solid rgba(255,255,255,0.9);box-shadow:0 4px 24px rgba(0,0,0,0.3);margin:0 auto 10px;background:linear-gradient(135deg,#f9a8d4,#c084fc)">S</div>
-      <div class="profile-name" id="profileName" style="color:#fff;font-size:24px;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,0.4)">Subham</div>
-      <div class="profile-status" style="justify-content:center;margin-top:4px"><span class="dot-online" style="background:#22c55e;width:9px;height:9px;border-radius:50%;display:inline-block;box-shadow:0 0 6px #22c55e"></span><span id="profileStatusTxt" style="color:rgba(255,255,255,0.85);font-size:13px;margin-left:5px">Online</span></div>
+  <div style="position:relative;height:65dvh;overflow:hidden">
+    <img id="profileBanner" src="https://i.ibb.co/hRN2mnJ5/IMG-2648.jpg" alt="Banner"
+      style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block"/>
+    <div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 45%,rgba(0,0,0,0.18) 65%,rgba(10,5,30,0.82) 100%);backdrop-filter:none"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 55%,rgba(10,5,30,0.7) 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 55%,black 100%);mask-image:linear-gradient(to bottom,transparent 55%,black 100%);backdrop-filter:blur(8px)"></div>
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 20px 16px">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="profile-avatar" id="profileAvatar" style="width:44px;height:44px;font-size:18px;border:2.5px solid rgba(255,255,255,0.85);box-shadow:0 2px 12px rgba(0,0,0,0.3);flex-shrink:0;margin:0;background:linear-gradient(135deg,#f9a8d4,#c084fc)">S</div>
+          <div>
+            <div class="profile-name" id="profileName" style="color:#fff;font-size:16px;font-weight:700;text-shadow:0 1px 6px rgba(0,0,0,0.5);line-height:1.2">Subham</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-top:2px">
+              <span id="myStatusDot" style="width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;box-shadow:0 0 5px #22c55e"></span>
+              <span id="profileStatusTxt" style="color:rgba(255,255,255,0.8);font-size:11px">Online</span>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="color:rgba(255,255,255,0.6);font-size:10px;margin-bottom:3px">Partner</div>
+          <div style="display:flex;align-items:center;gap:4px;justify-content:flex-end">
+            <span id="partnerStatusDot" style="width:7px;height:7px;border-radius:50%;background:#94a3b8;display:inline-block"></span>
+            <span id="partnerStatusTxt" style="color:rgba(255,255,255,0.8);font-size:11px" id="partnerName">Arpita</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div style="height:0"></div>
@@ -798,10 +815,13 @@ function updateUI(){
   document.getElementById('profileName').style.color='#fff';
   document.getElementById('profileName').textContent=currentUser;
   // Set profile banner based on user
-  const banners={Subham:'https://i.ibb.co/zWwZsRb6/IMG-3724.jpg',Arpita:'https://i.ibb.co/N5tb1FN/IMG-3412.jpg'};
+  const banners={Subham:'https://i.ibb.co/hRN2mnJ5/IMG-2648.jpg',Arpita:'https://i.ibb.co/N5tb1FN/IMG-3412.jpg'};
   const bannerEl=document.getElementById('profileBanner');
   if(bannerEl) bannerEl.src=banners[currentUser]||banners.Subham;
   document.getElementById('partnerName').textContent=partner+' \u{1f495}';
+  // Set partner name label in banner
+  const pStatusTxt=document.getElementById('partnerStatusTxt');
+  if(pStatusTxt){ pStatusTxt.textContent=partner; pStatusTxt.dataset.nameSet='1'; }
   document.getElementById('joinedDate').textContent=new Date().toLocaleDateString('en-IN',{year:'numeric',month:'long'});
 }
 
@@ -823,6 +843,18 @@ function listenPresence(){
     Object.entries(data).forEach(([name, d])=>{
       const dot=document.getElementById(name.toLowerCase()+'Dot');
       if(dot){ dot.className = d.online?'dot-online':'dot-offline'; }
+      if(currentUser && name===currentUser){
+        const myDot=document.getElementById('myStatusDot');
+        const myTxt=document.getElementById('profileStatusTxt');
+        if(myDot){ myDot.style.background=d.online?'#22c55e':'#94a3b8'; myDot.style.boxShadow=d.online?'0 0 5px #22c55e':'none'; }
+        if(myTxt){ myTxt.textContent=d.online?'Online':'Offline'; }
+      }
+      if(currentUser && name!==currentUser){
+        const pDot=document.getElementById('partnerStatusDot');
+        const pTxt=document.getElementById('partnerStatusTxt');
+        if(pDot){ pDot.style.background=d.online?'#22c55e':'#94a3b8'; pDot.style.boxShadow=d.online?'0 0 5px #22c55e':'none'; }
+        if(pTxt && pTxt.dataset.nameSet){ pTxt.textContent=(d.online?'• Online':'• Offline'); }
+      }
     });
   });
   presenceOff = ()=> ref.off('value', handler);
