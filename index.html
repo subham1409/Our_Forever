@@ -701,6 +701,14 @@ async function initFirebase(){
   firebase.initializeApp(FB_CONFIG);
   db=firebase.firestore();
   storage=firebase.storage();
+  // Test Firestore write permission
+  db.collection('_ping').doc('test').set({t:Date.now()}).then(()=>{
+    console.log('Firestore: write OK');
+  }).catch(e=>{
+    console.error('Firestore RULES BLOCKING writes:',e.message);
+    showToast('🚫','Fix Firestore Rules! See console.');
+    document.getElementById('rulesWarning').style.display='block';
+  });
   loadFloatingHearts();
   listenPresence();
   loadGameScores();
@@ -910,6 +918,21 @@ function previewPhoto(e){
   };
   r.readAsDataURL(f);
 }
+async function compressImage(file,maxW,quality){
+  return new Promise(res=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const ratio=Math.min(1,maxW/img.width);
+      const c=document.createElement('canvas');
+      c.width=img.width*ratio;c.height=img.height*ratio;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);
+      res(c.toDataURL('image/jpeg',quality));
+    };
+    img.src=url;
+  });
+}
 async function saveMemory(){
   const title=document.getElementById('memTitle').value.trim();
   const folder=document.getElementById('memFolder').value;
@@ -919,21 +942,32 @@ async function saveMemory(){
   if(!file){showToast('⚠️','Please select a photo!');return}
   showProgress();
   try{
-    const dataUrl=await new Promise(res=>{
-      const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(file);
-    });
+    // Compress image to max 800px wide, 0.7 quality to stay under Firestore 1MB limit
+    const dataUrl=await compressImage(file,800,0.7);
+    // Check size - Firestore doc limit is ~1MB
+    const sizeKB=Math.round(dataUrl.length*0.75/1024);
+    if(sizeKB>900){
+      // Too large even after compression - try harder
+      const dataUrl2=await compressImage(file,600,0.5);
+      var finalUrl=dataUrl2;
+    } else {
+      var finalUrl=dataUrl;
+    }
     await db.collection('memories').add({
       title,folder,desc,uploadedBy:currentUser,
       date:firebase.firestore.FieldValue.serverTimestamp(),
-      dataUrl
+      dataUrl:finalUrl
     });
     closeModal('memoryModal');
+    document.getElementById('photoFile').value='';
+    document.getElementById('photoPreviewImg').style.display='none';
+    document.getElementById('photoUploadBtn').style.display='flex';
     showToast('📸',currentUser+' added a new memory!');
     hideProgress();
   }catch(err){
     hideProgress();
-    showToast('❌','Failed to save memory');
-    console.error(err);
+    showToast('❌','Error: '+err.message);
+    console.error('saveMemory error:',err);
   }
 }
 async function deleteMemory(id){
@@ -1438,7 +1472,7 @@ document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='En
 // ===== BOOT =====
 initFirebase().catch(e=>{
   console.error('Firebase init failed:',e);
-  showToast('⚠️','Connection issue - some features may be limited');
+  showToast('⚠️','Firebase error: '+e.message); console.error('Init:',e);
 });
 
 // Expose to global scope for inline onclick handlers
