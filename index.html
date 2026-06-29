@@ -669,57 +669,57 @@ const FB_CONFIG = {
 };
 
 const USERS = {
-  Subham:{password:"Aram1702",emoji:"💙",av:"av1",letter:"S"},
-  Arpita:{password:"Aram2702",emoji:"💗",av:"av2",letter:"A"}
+  Subham:{password:"Aram1702",emoji:"\u{1f499}",av:"av1",letter:"S"},
+  Arpita:{password:"Aram2702",emoji:"\u{1f497}",av:"av2",letter:"A"}
 };
 
-let db,storage,currentUser=null,selectedUser=null,activeTab='home';
-let memoriesData=[],notesData=[],currentFolder='All',noteSearchQ='';
-let tttBoard=Array(9).fill(null),tttTurn='Subham',tttScores={Subham:0,Arpita:0,draws:0};
-let tttUnsub=null,notesUnsub=null,memoriesUnsub=null,presenceUnsub=null;
+let rtdb=null, storage=null;
+let currentUser=null, selectedUser=null, activeTab='home';
+let memoriesData=[], notesData=[], currentFolder='All', noteSearchQ='';
+let tttBoard=Array(9).fill(null), tttTurn='Subham', tttScores={Subham:0,Arpita:0,draws:0};
 let rpsScores={Subham:0,Arpita:0};
-let rpsMyChoice=null,rpsTheirChoice=null,rpsTimerInt=null;
+let rpsMyChoice=null, rpsTimerInt=null, rpsChooseTimer=null;
 let drawScores={Subham:0,Arpita:0};
-let drawCtx,drawColor='#1e1b4b',brushSize=4,drawHistory=[],isDrawing=false;
-let currentNoteId=null,editingNoteId=null;
-let drawUnsub=null,rpsUnsub=null;
+let drawCtx, drawColor='#1e1b4b', brushSize=4, drawHistory=[], isDrawing=false;
+let drawPhase='idle', drawRole='drawer', drawWord='';
+let editingNoteId=null;
+// Realtime DB listeners (off functions)
+let memOff=null, notesOff=null, tttOff=null, rpsOff=null, drawOff=null, presenceOff=null;
 
 // ===== FIREBASE INIT =====
 async function initFirebase(){
   const scripts=[
     'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
-    'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js',
+    'https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js',
     'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js'
   ];
   for(const src of scripts){
     await new Promise((res,rej)=>{
       const s=document.createElement('script');
-      s.src=src;s.onload=res;s.onerror=rej;
+      s.src=src; s.onload=res; s.onerror=rej;
       document.head.appendChild(s);
     });
   }
   firebase.initializeApp(FB_CONFIG);
-  db=firebase.firestore();
-  storage=firebase.storage();
-  // Test Firestore write permission
-  db.collection('_ping').doc('test').set({t:Date.now()}).then(()=>{
-    console.log('Firestore: write OK');
-  }).catch(e=>{
-    console.error('Firestore RULES BLOCKING writes:',e.message);
-    showToast('🚫','Fix Firestore Rules! See console.');
-    document.getElementById('rulesWarning').style.display='block';
-  });
+  rtdb = firebase.database();
+  storage = firebase.storage();
   loadFloatingHearts();
   listenPresence();
   loadGameScores();
   // Auto-restore session on page refresh
-  const saved=localStorage.getItem('cu_session');
+  const saved = localStorage.getItem('cu_session');
   if(saved && USERS[saved]){
-    currentUser=saved;
+    currentUser = saved;
     enterApp(true);
-    showToast('💕','Welcome back, '+currentUser+'!');
+    showToast('\u{1f495}','Welcome back, '+currentUser+'!');
   }
 }
+
+// ===== HELPERS =====
+// Generate unique push ID (like Firestore's .add())
+function pushId(){ return rtdb.ref().push().key; }
+// Get current server timestamp value
+function now(){ return firebase.database.ServerValue.TIMESTAMP; }
 
 // ===== GATE =====
 function toggleGatePw(){
@@ -733,7 +733,7 @@ function checkGate(){
     document.getElementById('gateCard').style.display='none';
     document.getElementById('userCard').style.display='block';
   } else {
-    document.getElementById('gateErr').textContent='Wrong key! Try again 🔒';
+    document.getElementById('gateErr').textContent='Wrong key! Try again \u{1f512}';
     document.getElementById('gateInput').value='';
     document.getElementById('gateInput').classList.add('shake');
     setTimeout(()=>document.getElementById('gateInput').classList.remove('shake'),500);
@@ -754,21 +754,20 @@ function togglePw(){
   inp.type=inp.type==='password'?'text':'password';
 }
 function doLogin(){
-  if(!selectedUser){showErr('Please select who you are! 💕');return}
+  if(!selectedUser){showErr('Please select who you are! \u{1f495}');return}
   const pw=document.getElementById('pwInput').value;
   if(pw===USERS[selectedUser].password){
     currentUser=selectedUser;
     document.getElementById('loginErr').textContent='';
     enterApp();
   } else {
-    showErr('Wrong password! Try again 🔒');
+    showErr('Wrong password! Try again \u{1f512}');
     document.getElementById('pwInput').value='';
     document.getElementById('pwInput').classList.add('shake');
     setTimeout(()=>document.getElementById('pwInput').classList.remove('shake'),500);
   }
 }
 document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-
 function showErr(m){document.getElementById('loginErr').textContent=m}
 
 function enterApp(silent){
@@ -780,43 +779,49 @@ function enterApp(silent){
   listenMemories();
   listenNotes();
   localStorage.setItem('cu_session', currentUser);
-  if(!silent) showToast('💕','Welcome back, '+currentUser+'!');
+  if(!silent) showToast('\u{1f495}','Welcome back, '+currentUser+'!');
 }
 
 function updateUI(){
   const partner=currentUser==='Subham'?'Arpita':'Subham';
-  document.getElementById('welcomeText').textContent='Welcome '+currentUser+' ❤️ '+partner;
-  document.getElementById('headerSub').textContent='Your private world 💕';
+  document.getElementById('welcomeText').textContent='Welcome '+currentUser+' \u2764\ufe0f '+partner;
+  document.getElementById('headerSub').textContent='Your private world \u{1f495}';
   const av=USERS[currentUser];
   document.getElementById('profileAvatar').textContent=av.letter;
-  document.getElementById('profileAvatar').className='profile-avatar '+(av.av==='av1'?'':'');
   document.getElementById('profileAvatar').style.background=av.av==='av1'?'linear-gradient(135deg,#f9a8d4,#c084fc)':'linear-gradient(135deg,#93c5fd,#a5b4fc)';
   document.getElementById('profileName').textContent=currentUser;
-  document.getElementById('partnerName').textContent=partner+' 💕';
+  document.getElementById('partnerName').textContent=partner+' \u{1f495}';
   document.getElementById('joinedDate').textContent=new Date().toLocaleDateString('en-IN',{year:'numeric',month:'long'});
 }
 
 // ===== PRESENCE =====
 function setPresence(online){
-  if(!db||!currentUser)return;
-  db.collection('presence').doc(currentUser).set({online,lastSeen:firebase.firestore.FieldValue.serverTimestamp()});
+  if(!rtdb||!currentUser)return;
+  rtdb.ref('presence/'+currentUser).set({online, lastSeen: now()});
+  if(online){
+    // Auto set offline on disconnect
+    rtdb.ref('presence/'+currentUser).onDisconnect().update({online:false, lastSeen: now()});
+  }
 }
 function listenPresence(){
-  if(!db)return;
-  db.collection('presence').onSnapshot(snap=>{
-    snap.forEach(doc=>{
-      const n=doc.id,d=doc.data();
-      const dot=document.getElementById(n.toLowerCase()+'Dot');
-      if(dot){dot.className=d.online?'dot-online':'dot-offline'}
+  if(!rtdb)return;
+  if(presenceOff){ presenceOff(); presenceOff=null; }
+  const ref = rtdb.ref('presence');
+  const handler = ref.on('value', snap=>{
+    const data = snap.val()||{};
+    Object.entries(data).forEach(([name, d])=>{
+      const dot=document.getElementById(name.toLowerCase()+'Dot');
+      if(dot){ dot.className = d.online?'dot-online':'dot-offline'; }
     });
   });
+  presenceOff = ()=> ref.off('value', handler);
 }
 
 // ===== FLOATING HEARTS =====
 function loadFloatingHearts(){
   const c=document.getElementById('heartsBg');
   if(!c)return;
-  const hearts=['💕','❤️','💗','💖','💓','💞','🌸','✨'];
+  const hearts=['\u{1f495}','\u2764\ufe0f','\u{1f497}','\u{1f496}','\u{1f493}','\u{1f49e}','\u{1f338}','\u2728'];
   for(let i=0;i<18;i++){
     const h=document.createElement('div');
     h.className='heart-float';
@@ -849,8 +854,8 @@ function switchTab(tab){
       if(el) el.style.display=(t===tab)?'block':'none';
     });
   }
-  if(tab==='profile')refreshProfile();
-  if(tab==='games')refreshGameBadges();
+  if(tab==='profile') refreshProfile();
+  if(tab==='games') refreshGameBadges();
 }
 function navigateTo(tab){switchTab(tab)}
 function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1)}
@@ -868,13 +873,17 @@ function showToast(icon,text){
 
 // ===== MEMORIES =====
 function listenMemories(){
-  if(!db)return;
-  if(memoriesUnsub)memoriesUnsub();
-  memoriesUnsub=db.collection('memories').orderBy('date','desc').onSnapshot(snap=>{
-    memoriesData=snap.docs.map(d=>({id:d.id,...d.data()}));
+  if(!rtdb)return;
+  if(memOff){ memOff(); memOff=null; }
+  const ref = rtdb.ref('memories');
+  const handler = ref.on('value', snap=>{
+    const data = snap.val()||{};
+    memoriesData = Object.entries(data).map(([id,v])=>({id,...v}))
+      .sort((a,b)=>(b.date||0)-(a.date||0));
     renderGallery();
     updateProfileStats();
   });
+  memOff = ()=> ref.off('value', handler);
 }
 function filterFolder(folder,el){
   currentFolder=folder;
@@ -886,17 +895,17 @@ function renderGallery(){
   const g=document.getElementById('gallery');
   const filtered=currentFolder==='All'?memoriesData:memoriesData.filter(m=>m.folder===currentFolder);
   if(!filtered.length){
-    g.innerHTML=`<div class="empty-state" style="column-span:all"><div class="empty-icon">📷</div><div class="empty-text">No memories yet</div><div class="empty-sub">Tap + to add your first photo 💕</div></div>`;
+    g.innerHTML='<div class="empty-state" style="column-span:all"><div class="empty-icon">\u{1f4f7}</div><div class="empty-text">No memories yet</div><div class="empty-sub">Tap + to add your first photo \u{1f495}</div></div>';
     return;
   }
   g.innerHTML=filtered.map(m=>`
     <div class="gallery-item" onclick="openViewer('${m.id}')">
-      <img src="${m.url||m.dataUrl}" alt="${m.title}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23f3e5f5%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2230%22%3E📷%3C/text%3E%3C/svg%3E'"/>
+      <img src="${m.dataUrl||m.url||''}" alt="${m.title}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23f3e5f5%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2230%22%3E\u{1f4f7}%3C/text%3E%3C/svg%3E'"/>
       <div class="gallery-info">
         <div class="gallery-title">${m.title}</div>
-        <div class="gallery-meta">${m.uploadedBy} · ${formatDate(m.date)}</div>
+        <div class="gallery-meta">${m.uploadedBy} \u00b7 ${formatDate(m.date)}</div>
       </div>
-      <button class="gallery-del" onclick="event.stopPropagation();deleteMemory('${m.id}')">🗑️</button>
+      <button class="gallery-del" onclick="event.stopPropagation();deleteMemory('${m.id}')">\u{1f5d1}\ufe0f</button>
     </div>
   `).join('');
 }
@@ -925,7 +934,7 @@ async function compressImage(file,maxW,quality){
     img.onload=()=>{
       const ratio=Math.min(1,maxW/img.width);
       const c=document.createElement('canvas');
-      c.width=img.width*ratio;c.height=img.height*ratio;
+      c.width=img.width*ratio; c.height=img.height*ratio;
       c.getContext('2d').drawImage(img,0,0,c.width,c.height);
       URL.revokeObjectURL(url);
       res(c.toDataURL('image/jpeg',quality));
@@ -938,69 +947,71 @@ async function saveMemory(){
   const folder=document.getElementById('memFolder').value;
   const desc=document.getElementById('memDesc').value.trim();
   const file=document.getElementById('photoFile').files[0];
-  if(!title){showToast('⚠️','Please add a title!');return}
-  if(!file){showToast('⚠️','Please select a photo!');return}
+  if(!title){showToast('\u26a0\ufe0f','Please add a title!');return}
+  if(!file){showToast('\u26a0\ufe0f','Please select a photo!');return}
   showProgress();
   try{
-    // Compress image to max 800px wide, 0.7 quality to stay under Firestore 1MB limit
-    const dataUrl=await compressImage(file,800,0.7);
-    // Check size - Firestore doc limit is ~1MB
+    // Compress image: RTDB node limit is 10MB but base64 inflates ~33%, so target ~700KB
+    let dataUrl=await compressImage(file,900,0.75);
     const sizeKB=Math.round(dataUrl.length*0.75/1024);
-    if(sizeKB>900){
-      // Too large even after compression - try harder
-      const dataUrl2=await compressImage(file,600,0.5);
-      var finalUrl=dataUrl2;
-    } else {
-      var finalUrl=dataUrl;
-    }
-    await db.collection('memories').add({
-      title,folder,desc,uploadedBy:currentUser,
-      date:firebase.firestore.FieldValue.serverTimestamp(),
-      dataUrl:finalUrl
+    if(sizeKB>700) dataUrl=await compressImage(file,600,0.55);
+    const id=pushId();
+    await rtdb.ref('memories/'+id).set({
+      title, folder, desc, uploadedBy:currentUser,
+      date: Date.now(),
+      dataUrl
     });
     closeModal('memoryModal');
     document.getElementById('photoFile').value='';
     document.getElementById('photoPreviewImg').style.display='none';
     document.getElementById('photoUploadBtn').style.display='flex';
-    showToast('📸',currentUser+' added a new memory!');
+    showToast('\u{1f4f8}',currentUser+' added a new memory!');
     hideProgress();
   }catch(err){
     hideProgress();
-    showToast('❌','Error: '+err.message);
+    showToast('\u274c','Error: '+err.message);
     console.error('saveMemory error:',err);
   }
 }
 async function deleteMemory(id){
-  if(!confirm('Delete this memory? 💔'))return;
-  await db.collection('memories').doc(id).delete();
-  showToast('🗑️','Memory deleted');
+  if(!confirm('Delete this memory? \u{1f494}'))return;
+  await rtdb.ref('memories/'+id).remove();
+  showToast('\u{1f5d1}\ufe0f','Memory deleted');
 }
 function openViewer(id){
   const m=memoriesData.find(x=>x.id===id);if(!m)return;
-  document.getElementById('viewerImg').src=m.url||m.dataUrl;
+  document.getElementById('viewerImg').src=m.dataUrl||m.url||'';
   document.getElementById('viewerTitle').textContent=m.title;
-  document.getElementById('viewerMeta').textContent=m.uploadedBy+' · '+(m.desc||'')+' · '+formatDate(m.date);
+  document.getElementById('viewerMeta').textContent=m.uploadedBy+' \u00b7 '+(m.desc||'')+' \u00b7 '+formatDate(m.date);
   document.getElementById('imageViewer').classList.add('open');
 }
 function closeViewer(){document.getElementById('imageViewer').classList.remove('open')}
 
 // ===== NOTES =====
 function listenNotes(){
-  if(!db)return;
-  if(notesUnsub)notesUnsub();
-  notesUnsub=db.collection('notes').orderBy('pinned','desc').onSnapshot(snap=>{
-    notesData=snap.docs.map(d=>({id:d.id,...d.data()}));
+  if(!rtdb)return;
+  if(notesOff){ notesOff(); notesOff=null; }
+  const ref = rtdb.ref('notes');
+  const handler = ref.on('value', snap=>{
+    const data = snap.val()||{};
+    notesData = Object.entries(data).map(([id,v])=>({id,...v}))
+      .sort((a,b)=>{
+        if(a.pinned&&!b.pinned)return -1;
+        if(!a.pinned&&b.pinned)return 1;
+        return (b.editedAt||b.createdAt||0)-(a.editedAt||a.createdAt||0);
+      });
     renderNotes();
     updateProfileStats();
   });
+  notesOff = ()=> ref.off('value', handler);
 }
 function filterNotes(){noteSearchQ=document.getElementById('notesSearch').value.toLowerCase();renderNotes()}
 function renderNotes(){
   const list=document.getElementById('notesList');
   let filtered=notesData;
-  if(noteSearchQ)filtered=filtered.filter(n=>n.title.toLowerCase().includes(noteSearchQ)||n.body.toLowerCase().includes(noteSearchQ));
+  if(noteSearchQ) filtered=filtered.filter(n=>(n.title||'').toLowerCase().includes(noteSearchQ)||(n.body||'').toLowerCase().includes(noteSearchQ));
   if(!filtered.length){
-    list.innerHTML=`<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">No notes yet</div><div class="empty-sub">Tap + to write your first note 💕</div></div>`;
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">\u{1f4dd}</div><div class="empty-text">No notes yet</div><div class="empty-sub">Tap + to write your first note \u{1f495}</div></div>';
     return;
   }
   list.innerHTML=filtered.map(n=>`
@@ -1008,10 +1019,10 @@ function renderNotes(){
       <div class="note-title">${n.title||'Untitled'}</div>
       <div class="note-preview">${n.body||''}</div>
       <div class="note-meta">
-        <div class="note-by">${n.editedBy||n.createdBy||'?'} · ${formatDate(n.editedAt||n.createdAt)}</div>
+        <div class="note-by">${n.editedBy||n.createdBy||'?'} \u00b7 ${formatDate(n.editedAt||n.createdAt)}</div>
         <div class="note-actions">
-          <span class="note-pin" onclick="event.stopPropagation();pinNote('${n.id}',${!n.pinned})" title="Pin">${n.pinned?'📌':'📍'}</span>
-          <button class="note-del" onclick="event.stopPropagation();deleteNote('${n.id}')">🗑️</button>
+          <span class="note-pin" onclick="event.stopPropagation();pinNote('${n.id}',${!n.pinned})">${n.pinned?'\u{1f4cc}':'\u{1f4cd}'}</span>
+          <button class="note-del" onclick="event.stopPropagation();deleteNote('${n.id}')">\u{1f5d1}\ufe0f</button>
         </div>
       </div>
     </div>
@@ -1030,104 +1041,113 @@ function openNote(id){
   editingNoteId=id;
   document.getElementById('editorTitle').value=n.title||'';
   document.getElementById('editorBody').value=n.body||'';
-  document.getElementById('editorMeta').textContent='Edited by '+(n.editedBy||'?')+' · '+formatDate(n.editedAt||n.createdAt);
+  document.getElementById('editorMeta').textContent='Edited by '+(n.editedBy||'?')+' \u00b7 '+formatDate(n.editedAt||n.createdAt);
   document.getElementById('noteEditor').classList.add('open');
 }
 function closeNoteEditor(){document.getElementById('noteEditor').classList.remove('open')}
 async function saveNote(){
   const title=document.getElementById('editorTitle').value.trim()||'Untitled';
   const body=document.getElementById('editorBody').value;
-  const data={title,body,editedBy:currentUser,editedAt:firebase.firestore.FieldValue.serverTimestamp()};
   try{
     if(editingNoteId){
-      await db.collection('notes').doc(editingNoteId).update(data);
+      await rtdb.ref('notes/'+editingNoteId).update({title,body,editedBy:currentUser,editedAt:Date.now()});
     } else {
-      await db.collection('notes').add({...data,createdBy:currentUser,createdAt:firebase.firestore.FieldValue.serverTimestamp(),pinned:false});
+      const id=pushId();
+      await rtdb.ref('notes/'+id).set({title,body,createdBy:currentUser,createdAt:Date.now(),editedBy:currentUser,editedAt:Date.now(),pinned:false});
+      editingNoteId=id;
+      showToast('\u{1f4dd}',currentUser+' created a new note!');
     }
-    document.getElementById('editorSaved').textContent='✅ Saved';
+    document.getElementById('editorSaved').textContent='\u2705 Saved';
     setTimeout(()=>document.getElementById('editorSaved').textContent='',2000);
-    if(!editingNoteId)showToast('📝',currentUser+' created a new note!');
-  }catch(e){showToast('❌','Failed to save')}
+  }catch(e){
+    showToast('\u274c','Save error: '+e.message);
+    console.error('saveNote:',e);
+  }
 }
 async function pinNote(id,pin){
-  await db.collection('notes').doc(id).update({pinned:pin});
+  await rtdb.ref('notes/'+id).update({pinned:pin});
 }
 async function deleteNote(id){
   if(!confirm('Delete this note?'))return;
-  await db.collection('notes').doc(id).delete();
-  showToast('🗑️','Note deleted');
+  await rtdb.ref('notes/'+id).remove();
+  showToast('\u{1f5d1}\ufe0f','Note deleted');
 }
 
 // ===== TTT =====
 function openTTT(){document.getElementById('tttGame').classList.add('open');renderTTT();listenTTT()}
-function closeTTT(){document.getElementById('tttGame').classList.remove('open');if(tttUnsub)tttUnsub()}
+function closeTTT(){
+  document.getElementById('tttGame').classList.remove('open');
+  if(tttOff){ tttOff(); tttOff=null; }
+}
 function listenTTT(){
-  if(!db)return;
-  if(tttUnsub)tttUnsub();
-  tttUnsub=db.collection('games').doc('ttt').onSnapshot(snap=>{
-    if(snap.exists){
-      const d=snap.data();
+  if(!rtdb)return;
+  if(tttOff){ tttOff(); tttOff=null; }
+  const ref = rtdb.ref('games/ttt');
+  const handler = ref.on('value', snap=>{
+    if(snap.exists()){
+      const d=snap.val();
       tttBoard=d.board||Array(9).fill(null);
       tttTurn=d.turn||'Subham';
       tttScores=d.scores||{Subham:0,Arpita:0,draws:0};
       renderTTT();
     } else {
-      initTTTFirestore();
+      initTTTDB();
     }
   });
+  tttOff = ()=> ref.off('value', handler);
 }
-async function initTTTFirestore(){
-  await db.collection('games').doc('ttt').set({board:Array(9).fill(null),turn:'Subham',scores:{Subham:0,Arpita:0,draws:0}});
+async function initTTTDB(){
+  await rtdb.ref('games/ttt').set({board:Array(9).fill(null),turn:'Subham',scores:{Subham:0,Arpita:0,draws:0}});
 }
 function renderTTT(){
   const board=document.getElementById('tttBoard');
-  const marks={Subham:'❌',Arpita:'⭕'};
+  const marks={Subham:'\u274c',Arpita:'\u2b55'};
   const winner=checkWinner(tttBoard);
   const full=tttBoard.every(c=>c);
   document.getElementById('tttS').textContent=tttScores.Subham||0;
   document.getElementById('tttA').textContent=tttScores.Arpita||0;
   document.getElementById('tttD').textContent=tttScores.draws||0;
   let winCells=[];
-  if(winner)winCells=getWinLine(tttBoard);
+  if(winner) winCells=getWinLine(tttBoard);
   board.innerHTML=tttBoard.map((cell,i)=>`
     <div class="ttt-cell ${cell?'taken':''} ${winCells.includes(i)?'win-cell':''}" onclick="tttClick(${i})">
       ${cell?marks[cell]:''}
     </div>
   `).join('');
   const status=document.getElementById('tttStatus');
-  if(winner){status.textContent='🎉 '+winner+' wins this round!';}
-  else if(full){status.textContent='🤝 It\'s a draw!'}
-  else{status.textContent=(tttTurn==='Subham'?'❌':'⭕')+' '+tttTurn+'\'s turn'}
+  if(winner) status.textContent='\u{1f389} '+winner+' wins this round!';
+  else if(full) status.textContent='\u{1f91d} It\'s a draw!';
+  else status.textContent=(tttTurn==='Subham'?'\u274c':'\u2b55')+' '+tttTurn+'\'s turn';
 }
 async function tttClick(i){
   if(tttBoard[i])return;
   const winner=checkWinner(tttBoard);if(winner)return;
-  if(tttTurn!==currentUser){showToast('⏳','It\'s '+tttTurn+'\'s turn!');return}
-  const newBoard=[...tttBoard];newBoard[i]=currentUser;
+  if(tttTurn!==currentUser){showToast('\u23f3','It\'s '+tttTurn+'\'s turn!');return}
+  const newBoard=[...tttBoard]; newBoard[i]=currentUser;
   const newWinner=checkWinner(newBoard);
   const newFull=newBoard.every(c=>c);
   let newScores={...tttScores};
   let newTurn=currentUser==='Subham'?'Arpita':'Subham';
+  await rtdb.ref('games/ttt').update({board:newBoard,turn:newTurn,scores:newScores});
   if(newWinner){
     newScores[newWinner]=(newScores[newWinner]||0)+1;
-    showToast('🏆',newWinner+' wins! 🎉');
+    showToast('\u{1f3c6}',newWinner+' wins! \u{1f389}');
     confetti();
     setTimeout(async()=>{
-      await db.collection('games').doc('ttt').update({board:Array(9).fill(null),turn:newTurn,scores:newScores});
+      await rtdb.ref('games/ttt').update({board:Array(9).fill(null),turn:newTurn,scores:newScores});
     },2500);
   } else if(newFull){
     newScores.draws=(newScores.draws||0)+1;
-    showToast('🤝','It\'s a draw!');
+    showToast('\u{1f91d}','It\'s a draw!');
     setTimeout(async()=>{
-      await db.collection('games').doc('ttt').update({board:Array(9).fill(null),turn:newTurn,scores:newScores});
+      await rtdb.ref('games/ttt').update({board:Array(9).fill(null),turn:newTurn,scores:newScores});
     },2000);
   }
-  await db.collection('games').doc('ttt').update({board:newBoard,turn:newTurn,scores:newScores});
 }
-async function resetTTT(){await db.collection('games').doc('ttt').update({board:Array(9).fill(null),turn:'Subham'})}
+async function resetTTT(){await rtdb.ref('games/ttt').update({board:Array(9).fill(null),turn:'Subham'})}
 async function resetTTTScores(){
   if(!confirm('Reset all scores?'))return;
-  await db.collection('games').doc('ttt').set({board:Array(9).fill(null),turn:'Subham',scores:{Subham:0,Arpita:0,draws:0}});
+  await rtdb.ref('games/ttt').set({board:Array(9).fill(null),turn:'Subham',scores:{Subham:0,Arpita:0,draws:0}});
 }
 function checkWinner(b){
   const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
@@ -1142,114 +1162,114 @@ function getWinLine(b){
 
 // ===== RPS =====
 function openRPS(){document.getElementById('rpsGame').classList.add('open');listenRPS();startRPS()}
-function closeRPS(){document.getElementById('rpsGame').classList.remove('open');clearInterval(rpsTimerInt);if(rpsUnsub)rpsUnsub()}
+function closeRPS(){
+  document.getElementById('rpsGame').classList.remove('open');
+  clearInterval(rpsTimerInt); clearInterval(rpsChooseTimer);
+  if(rpsOff){ rpsOff(); rpsOff=null; }
+}
 function listenRPS(){
-  if(!db)return;
-  if(rpsUnsub)rpsUnsub();
-  rpsUnsub=db.collection('games').doc('rps').onSnapshot(snap=>{
-    if(snap.exists){
-      const d=snap.data();
-      rpsScores=d.scores||{Subham:0,Arpita:0};
-      document.getElementById('rpsS').textContent=rpsScores.Subham||0;
-      document.getElementById('rpsA').textContent=rpsScores.Arpita||0;
-      const myChoice=d[currentUser];
-      const partner=currentUser==='Subham'?'Arpita':'Subham';
-      const theirChoice=d[partner];
-      if(myChoice&&theirChoice&&d.phase==='reveal'){
-        showRPSResult(myChoice,theirChoice,d.result);
-      } else if(myChoice&&!theirChoice&&d.phase==='choosing'){
-        document.getElementById('rpsChoices').style.display='none';
-        document.getElementById('rpsWaiting').style.display='block';
-        document.getElementById('rpsWaitFor').textContent=partner;
-        document.getElementById('rpsResult').style.display='none';
-        clearInterval(rpsTimerInt);
-      }
+  if(!rtdb)return;
+  if(rpsOff){ rpsOff(); rpsOff=null; }
+  const ref = rtdb.ref('games/rps');
+  const handler = ref.on('value', snap=>{
+    if(!snap.exists()) return;
+    const d=snap.val();
+    rpsScores=d.scores||{Subham:0,Arpita:0};
+    document.getElementById('rpsS').textContent=rpsScores.Subham||0;
+    document.getElementById('rpsA').textContent=rpsScores.Arpita||0;
+    const partner=currentUser==='Subham'?'Arpita':'Subham';
+    const myChoice=d[currentUser];
+    const theirChoice=d[partner];
+    if(myChoice&&theirChoice&&d.phase==='reveal'){
+      showRPSResult(myChoice,theirChoice,d.result);
+    } else if(myChoice&&!theirChoice&&d.phase==='choosing'){
+      document.getElementById('rpsChoices').style.display='none';
+      document.getElementById('rpsWaiting').style.display='block';
+      document.getElementById('rpsWaitFor').textContent=partner;
+      document.getElementById('rpsResult').style.display='none';
+      clearInterval(rpsTimerInt);
     }
   });
+  rpsOff = ()=> ref.off('value', handler);
 }
 function startRPS(){
-  rpsMyChoice=null;rpsTheirChoice=null;
+  rpsMyChoice=null;
   document.getElementById('rpsCountdown').innerHTML='';
   document.getElementById('rpsChoices').style.display='none';
   document.getElementById('rpsResult').style.display='none';
   document.getElementById('rpsWaiting').style.display='none';
-  if(db)db.collection('games').doc('rps').set({phase:'countdown',Subham:null,Arpita:null,scores:rpsScores,result:null},{merge:true});
+  if(rtdb) rtdb.ref('games/rps').update({phase:'countdown',Subham:null,Arpita:null,scores:rpsScores,result:null});
   let count=3;
-  document.getElementById('rpsCountdown').innerHTML=`<div class="rps-timer">${count}</div>`;
+  document.getElementById('rpsCountdown').innerHTML='<div class="rps-timer">'+count+'</div>';
   clearInterval(rpsTimerInt);
   rpsTimerInt=setInterval(()=>{
     count--;
     if(count>0){
-      document.getElementById('rpsCountdown').innerHTML=`<div class="rps-timer">${count}</div>`;
+      document.getElementById('rpsCountdown').innerHTML='<div class="rps-timer">'+count+'</div>';
     } else if(count===0){
-      document.getElementById('rpsCountdown').innerHTML=`<div class="rps-timer" style="font-size:32px">GO! 🎯</div>`;
+      document.getElementById('rpsCountdown').innerHTML='<div class="rps-timer" style="font-size:32px">GO! \u{1f3af}</div>';
     } else {
       clearInterval(rpsTimerInt);
       document.getElementById('rpsCountdown').innerHTML='';
       document.getElementById('rpsChoices').style.display='block';
-      if(db)db.collection('games').doc('rps').update({phase:'choosing'});
+      if(rtdb) rtdb.ref('games/rps').update({phase:'choosing'});
       startRPSTimer();
     }
   },1000);
 }
-let rpsChooseTimer;
 function startRPSTimer(){
-  let t=3;
-  document.getElementById('rpsPrompt').textContent='⏰ '+t+'s to choose!';
+  let t=10;
+  document.getElementById('rpsPrompt').textContent='\u23f0 '+t+'s to choose!';
   clearInterval(rpsChooseTimer);
   rpsChooseTimer=setInterval(()=>{
     t--;
-    if(t>=0)document.getElementById('rpsPrompt').textContent='⏰ '+t+'s to choose!';
-    if(t<=0){
-      clearInterval(rpsChooseTimer);
-      if(!rpsMyChoice)rpsChoose(['🪨','📄','✂️'][Math.floor(Math.random()*3)]);
-    }
+    if(t>=0) document.getElementById('rpsPrompt').textContent='\u23f0 '+t+'s to choose!';
+    if(t<=0){ clearInterval(rpsChooseTimer); if(!rpsMyChoice) rpsChoose(['\u{1faa8}','\u{1f4c4}','\u2702\ufe0f'][Math.floor(Math.random()*3)]); }
   },1000);
 }
 async function rpsChoose(choice){
   if(rpsMyChoice)return;
   rpsMyChoice=choice;
-  document.querySelectorAll('.rps-btn').forEach(b=>{b.disabled=true;if(b.textContent.includes(choice))b.classList.add('selected')});
-  document.getElementById('rpsPrompt').textContent='✅ You chose '+choice;
+  document.querySelectorAll('.rps-btn').forEach(b=>{b.disabled=true;if(b.querySelector('span')&&b.querySelector('span').textContent===choice)b.classList.add('selected')});
+  document.getElementById('rpsPrompt').textContent='\u2705 You chose '+choice;
   clearInterval(rpsChooseTimer);
-  if(!db)return;
+  if(!rtdb)return;
   const partner=currentUser==='Subham'?'Arpita':'Subham';
-  await db.collection('games').doc('rps').update({[currentUser]:choice});
-  const snap=await db.collection('games').doc('rps').get();
-  const data=snap.data();
+  await rtdb.ref('games/rps').update({[currentUser]:choice});
+  const snap=await rtdb.ref('games/rps').get();
+  const data=snap.val();
   const theirChoice=data[partner];
   if(theirChoice){
     const result=rpsWinner(choice,theirChoice,currentUser,partner);
     let newScores={...rpsScores};
-    if(result.winner)newScores[result.winner]=(newScores[result.winner]||0)+1;
-    await db.collection('games').doc('rps').update({phase:'reveal',result:result.msg,scores:newScores});
+    if(result.winner) newScores[result.winner]=(newScores[result.winner]||0)+1;
+    await rtdb.ref('games/rps').update({phase:'reveal',result:result.msg,scores:newScores});
   }
 }
 function rpsWinner(myC,theirC,me,them){
-  const beats={'🪨':'✂️','📄':'🪨','✂️':'📄'};
-  if(myC===theirC)return{winner:null,msg:"It's a draw! 🤝"};
-  if(beats[myC]===theirC)return{winner:me,msg:me+' wins! 🎉'};
-  return{winner:them,msg:them+' wins! 🎉'};
+  const beats={'\u{1faa8}':'\u2702\ufe0f','\u{1f4c4}':'\u{1faa8}','\u2702\ufe0f':'\u{1f4c4}'};
+  if(myC===theirC)return{winner:null,msg:"It's a draw! \u{1f91d}"};
+  if(beats[myC]===theirC)return{winner:me,msg:me+' wins! \u{1f389}'};
+  return{winner:them,msg:them+' wins! \u{1f389}'};
 }
 function showRPSResult(myC,theirC,resultMsg){
   document.getElementById('rpsChoices').style.display='none';
   document.getElementById('rpsWaiting').style.display='none';
   const partner=currentUser==='Subham'?'Arpita':'Subham';
-  document.getElementById('rpsVsDisplay').innerHTML=`<div><div>${myC}</div><div style="font-size:13px;color:var(--muted)">${currentUser}</div></div><div style="font-size:18px;font-weight:700;color:var(--muted)">VS</div><div><div>${theirC}</div><div style="font-size:13px;color:var(--muted)">${partner}</div></div>`;
-  document.getElementById('rpsResultText').textContent=resultMsg;
+  document.getElementById('rpsVsDisplay').innerHTML='<div><div>'+myC+'</div><div style="font-size:13px;color:var(--muted)">'+currentUser+'</div></div><div style="font-size:18px;font-weight:700;color:var(--muted)">VS</div><div><div>'+theirC+'</div><div style="font-size:13px;color:var(--muted)">'+partner+'</div></div>';
+  document.getElementById('rpsResultText').textContent=resultMsg||'';
   document.getElementById('rpsResult').style.display='block';
-  if(resultMsg&&resultMsg.includes(currentUser)&&resultMsg.includes('wins'))confetti();
+  if(resultMsg&&resultMsg.includes(currentUser)&&resultMsg.includes('wins')) confetti();
 }
 async function resetRPSScores(){
   if(!confirm('Reset scores?'))return;
-  await db.collection('games').doc('rps').set({scores:{Subham:0,Arpita:0},phase:'idle'},{ merge:true});
+  await rtdb.ref('games/rps').update({scores:{Subham:0,Arpita:0},phase:'idle',Subham:null,Arpita:null});
   rpsScores={Subham:0,Arpita:0};
   document.getElementById('rpsS').textContent=0;
   document.getElementById('rpsA').textContent=0;
 }
 
 // ===== DRAW & GUESS =====
-let drawPhase='idle',drawRole='drawer',drawWord='',drawRound=0;
 function openDraw(){
   document.getElementById('drawGame').classList.add('open');
   initCanvas();
@@ -1257,7 +1277,7 @@ function openDraw(){
 }
 function closeDraw(){
   document.getElementById('drawGame').classList.remove('open');
-  if(drawUnsub)drawUnsub();
+  if(drawOff){ drawOff(); drawOff=null; }
 }
 function initCanvas(){
   const canvas=document.getElementById('drawCanvas');
@@ -1283,14 +1303,13 @@ function startDraw(e){
   drawCtx.moveTo(e.clientX-r.left,e.clientY-r.top);
 }
 function drawMove(e){
-  if(!isDrawing)return;
-  if(drawRole!=='drawer')return;
+  if(!isDrawing||drawRole!=='drawer')return;
   const r=e.target.getBoundingClientRect();
   drawCtx.lineTo(e.clientX-r.left,e.clientY-r.top);
   drawCtx.stroke();
-  if(db&&drawPhase==='drawing'){
+  if(rtdb&&drawPhase==='drawing'){
     const canvas=document.getElementById('drawCanvas');
-    db.collection('games').doc('draw').update({canvasData:canvas.toDataURL('image/jpeg',0.4)}).catch(()=>{});
+    rtdb.ref('games/draw').update({canvasData:canvas.toDataURL('image/jpeg',0.4)}).catch(()=>{});
   }
 }
 function endDraw(){
@@ -1310,7 +1329,7 @@ function clearCanvas(){
   drawCtx.fillStyle='#fff';
   drawCtx.fillRect(0,0,c.width,c.height);
   drawHistory=[];
-  if(db)db.collection('games').doc('draw').update({canvasData:''}).catch(()=>{});
+  if(rtdb) rtdb.ref('games/draw').update({canvasData:''}).catch(()=>{});
 }
 function setColor(el){
   document.querySelectorAll('.color-btn').forEach(b=>b.classList.remove('active'));
@@ -1325,19 +1344,19 @@ function setBrush(el){
   drawCtx.lineWidth=brushSize;
 }
 function listenDraw(){
-  if(!db)return;
-  if(drawUnsub)drawUnsub();
-  drawUnsub=db.collection('games').doc('draw').onSnapshot(snap=>{
-    if(!snap.exists){initDrawFirestore();return}
-    const d=snap.data();
+  if(!rtdb)return;
+  if(drawOff){ drawOff(); drawOff=null; }
+  const ref = rtdb.ref('games/draw');
+  const handler = ref.on('value', snap=>{
+    if(!snap.exists()){initDrawDB();return}
+    const d=snap.val();
     drawScores=d.scores||{Subham:0,Arpita:0};
     document.getElementById('drawS').textContent=drawScores.Subham||0;
     document.getElementById('drawA').textContent=drawScores.Arpita||0;
     drawPhase=d.phase||'idle';
     drawRole=d.drawer===currentUser?'drawer':'guesser';
     drawWord=d.word||'';
-    const partner=currentUser==='Subham'?'Arpita':'Subham';
-    document.getElementById('drawStatus').textContent=drawPhase==='idle'?'Start a new round!':(drawPhase==='drawing'?(d.drawer===currentUser?'You are drawing':''+d.drawer+' is drawing...'):'Waiting...');
+    document.getElementById('drawStatus').textContent=drawPhase==='idle'?'Start a new round!':(drawPhase==='drawing'?(d.drawer===currentUser?'You are drawing':d.drawer+' is drawing...'):'Waiting...');
     document.getElementById('drawStartSection').style.display=(drawPhase==='idle'||drawPhase==='done')?'block':'none';
     document.getElementById('drawerSection').style.display=(drawPhase==='drawing'&&drawRole==='drawer')?'block':'none';
     document.getElementById('guesserSection').style.display=(drawPhase==='drawing'&&drawRole==='guesser')?'block':'none';
@@ -1345,12 +1364,8 @@ function listenDraw(){
     if(drawPhase==='drawing'&&drawRole==='drawer'){
       document.getElementById('drawWordDisplay').textContent='Your word: '+drawWord;
       const guess=d.currentGuess;
-      if(guess){
-        document.getElementById('confirmSection').style.display='block';
-        document.getElementById('partnerGuess').textContent=guess;
-      } else {
-        document.getElementById('confirmSection').style.display='none';
-      }
+      document.getElementById('confirmSection').style.display=guess?'block':'none';
+      if(guess) document.getElementById('partnerGuess').textContent=guess;
     }
     if(drawPhase==='drawing'&&drawRole==='guesser'&&d.canvasData){
       const img=new Image();
@@ -1358,42 +1373,43 @@ function listenDraw(){
       img.src=d.canvasData;
     }
   });
+  drawOff = ()=> ref.off('value', handler);
 }
-async function initDrawFirestore(){
-  await db.collection('games').doc('draw').set({phase:'idle',drawer:'Subham',guesser:'Arpita',word:'',canvasData:'',scores:{Subham:0,Arpita:0},currentGuess:null});
+async function initDrawDB(){
+  await rtdb.ref('games/draw').set({phase:'idle',drawer:'Subham',guesser:'Arpita',word:'',canvasData:'',scores:{Subham:0,Arpita:0},currentGuess:null});
 }
 const drawWords=['cat','house','sun','tree','car','flower','moon','dog','fish','love','heart','star','cake','bird','book','phone','music','beach','mountain','rain'];
 async function startDrawRound(){
   const word=drawWords[Math.floor(Math.random()*drawWords.length)];
   const partner=currentUser==='Subham'?'Arpita':'Subham';
   clearCanvas();
-  await db.collection('games').doc('draw').update({phase:'drawing',drawer:currentUser,guesser:partner,word,canvasData:'',currentGuess:null});
-  showToast('🎨','New round! You draw: '+word);
+  await rtdb.ref('games/draw').update({phase:'drawing',drawer:currentUser,guesser:partner,word,canvasData:'',currentGuess:null});
+  showToast('\u{1f3a8}','New round! You draw: '+word);
 }
 async function submitGuess(){
   const g=document.getElementById('guessInput').value.trim();
   if(!g)return;
-  await db.collection('games').doc('draw').update({currentGuess:g});
+  await rtdb.ref('games/draw').update({currentGuess:g});
   document.getElementById('guessInput').value='';
-  showToast('💬','Guess sent!');
+  showToast('\u{1f4ac}','Guess sent!');
 }
 async function confirmGuess(correct){
-  const d=await db.collection('games').doc('draw').get();
-  const data=d.data();
+  const snap=await rtdb.ref('games/draw').get();
+  const data=snap.val();
   if(correct){
     const newScores={...drawScores};
     newScores[data.guesser]=(newScores[data.guesser]||0)+1;
-    await db.collection('games').doc('draw').update({phase:'done',scores:newScores,currentGuess:null});
-    showToast('🎉',data.guesser+' guessed correctly!');
+    await rtdb.ref('games/draw').update({phase:'done',scores:newScores,currentGuess:null});
+    showToast('\u{1f389}',data.guesser+' guessed correctly!');
     confetti();
   } else {
-    await db.collection('games').doc('draw').update({currentGuess:null});
-    showToast('❌','Wrong guess! Keep drawing!');
+    await rtdb.ref('games/draw').update({currentGuess:null});
+    showToast('\u274c','Wrong guess! Keep drawing!');
   }
 }
 async function resetDrawScores(){
   if(!confirm('Reset scores?'))return;
-  await db.collection('games').doc('draw').update({scores:{Subham:0,Arpita:0}});
+  await rtdb.ref('games/draw').update({scores:{Subham:0,Arpita:0}});
 }
 
 // ===== PROFILE =====
@@ -1411,31 +1427,35 @@ function updateProfileStats(){
   document.getElementById('statWins').textContent=wins;
 }
 function doLogout(){
-  if(!confirm('Logout? 💔'))return;
+  if(!confirm('Logout? \u{1f494}'))return;
   setPresence(false);
   localStorage.removeItem('cu_session');
-  currentUser=null;selectedUser=null;
+  currentUser=null; selectedUser=null;
+  // Stop all listeners
+  if(memOff){ memOff(); memOff=null; }
+  if(notesOff){ notesOff(); notesOff=null; }
+  if(tttOff){ tttOff(); tttOff=null; }
+  if(rpsOff){ rpsOff(); rpsOff=null; }
+  if(drawOff){ drawOff(); drawOff=null; }
   document.getElementById('homePage').classList.remove('active');
   document.getElementById('loginPage').classList.add('active');
   document.getElementById('pwInput').value='';
   document.getElementById('pwSection').style.display='none';
   document.querySelectorAll('.user-btn').forEach(b=>b.classList.remove('selected-user'));
-  if(memoriesUnsub)memoriesUnsub();
-  if(notesUnsub)notesUnsub();
 }
 
 // ===== GAME SCORES LOAD =====
 async function loadGameScores(){
-  if(!db)return;
+  if(!rtdb)return;
   try{
-    const ttt=await db.collection('games').doc('ttt').get();
-    if(ttt.exists)tttScores=ttt.data().scores||{Subham:0,Arpita:0,draws:0};
-    const rps=await db.collection('games').doc('rps').get();
-    if(rps.exists)rpsScores=rps.data().scores||{Subham:0,Arpita:0};
-    const draw=await db.collection('games').doc('draw').get();
-    if(draw.exists)drawScores=draw.data().scores||{Subham:0,Arpita:0};
+    const ttt=await rtdb.ref('games/ttt').get();
+    if(ttt.exists()) tttScores=ttt.val().scores||{Subham:0,Arpita:0,draws:0};
+    const rps=await rtdb.ref('games/rps').get();
+    if(rps.exists()) rpsScores=rps.val().scores||{Subham:0,Arpita:0};
+    const draw=await rtdb.ref('games/draw').get();
+    if(draw.exists()) drawScores=draw.val().scores||{Subham:0,Arpita:0};
     refreshGameBadges();
-  }catch(e){}
+  }catch(e){ console.error('loadGameScores:',e); }
 }
 function refreshGameBadges(){
   document.getElementById('tttBadge').textContent=(tttScores.Subham||0)+'-'+(tttScores.Arpita||0);
@@ -1445,8 +1465,8 @@ function refreshGameBadges(){
 
 // ===== UTILS =====
 function formatDate(ts){
-  if(!ts)return '—';
-  const d=ts.toDate?ts.toDate():new Date(ts);
+  if(!ts)return '\u2014';
+  const d=new Date(typeof ts==='number'?ts:ts);
   return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
 }
 function openModal(id){document.getElementById(id).classList.add('show')}
@@ -1458,7 +1478,7 @@ function confetti(){
   for(let i=0;i<30;i++){
     const c=document.createElement('div');
     c.className='confetti-piece';
-    c.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*20}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-delay:${Math.random()*0.8}s;animation-duration:${2+Math.random()}s;transform:rotate(${Math.random()*360}deg)`;
+    c.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*20+'%;background:'+colors[Math.floor(Math.random()*colors.length)]+';animation-delay:'+Math.random()*0.8+'s;animation-duration:'+(2+Math.random())+'s;transform:rotate('+Math.random()*360+'deg)';
     document.body.appendChild(c);
     setTimeout(()=>c.remove(),3000);
   }
@@ -1472,7 +1492,7 @@ document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='En
 // ===== BOOT =====
 initFirebase().catch(e=>{
   console.error('Firebase init failed:',e);
-  showToast('⚠️','Firebase error: '+e.message); console.error('Init:',e);
+  showToast('\u26a0\ufe0f','Firebase error: '+e.message);
 });
 
 // Expose to global scope for inline onclick handlers
@@ -1492,6 +1512,8 @@ window.startDrawRound=startDrawRound;window.submitGuess=submitGuess;
 window.confirmGuess=confirmGuess;window.resetDrawScores=resetDrawScores;
 window.doLogout=doLogout;window.openModal=openModal;window.closeModal=closeModal;
 window.setColor=setColor;window.setBrush=setBrush;
+window.undoDrawing=undoDrawing;window.pinNote=pinNote;window.openNote=openNote;
+window.startRPS=startRPS;window.resetRPSScores=resetRPSScores;
 })();
 </script>
 </body>
