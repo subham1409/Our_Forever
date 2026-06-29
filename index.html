@@ -1165,15 +1165,17 @@ function renderTTT(){
 async function tttClick(i){
   if(tttBoard[i])return;
   const winner=checkWinner(tttBoard);if(winner)return;
+  const full=tttBoard.every(c=>c);if(full)return;
   if(tttTurn!==currentUser){showToast('\u23f3','It\'s '+tttTurn+'\'s turn!');return}
   const newBoard=[...tttBoard]; newBoard[i]=currentUser;
   const newWinner=checkWinner(newBoard);
   const newFull=newBoard.every(c=>c);
   let newScores={...tttScores};
   let newTurn=currentUser==='Subham'?'Arpita':'Subham';
-  await rtdb.ref('games/ttt').update({board:newBoard,turn:newTurn,scores:newScores});
   if(newWinner){
     newScores[newWinner]=(newScores[newWinner]||0)+1;
+    // Save board with winner shown, then reset after delay
+    await rtdb.ref('games/ttt').update({board:newBoard,turn:newTurn,scores:newScores});
     showToast('\u{1f3c6}',newWinner+' wins! \u{1f389}');
     confetti();
     setTimeout(async()=>{
@@ -1181,10 +1183,13 @@ async function tttClick(i){
     },2500);
   } else if(newFull){
     newScores.draws=(newScores.draws||0)+1;
+    await rtdb.ref('games/ttt').update({board:newBoard,turn:newTurn,scores:newScores});
     showToast('\u{1f91d}','It\'s a draw!');
     setTimeout(async()=>{
       await rtdb.ref('games/ttt').update({board:Array(9).fill(null),turn:newTurn,scores:newScores});
     },2000);
+  } else {
+    await rtdb.ref('games/ttt').update({board:newBoard,turn:newTurn,scores:newScores});
   }
 }
 async function resetTTT(){await rtdb.ref('games/ttt').update({board:Array(9).fill(null),turn:'Subham'})}
@@ -1223,9 +1228,51 @@ function listenRPS(){
     const partner=currentUser==='Subham'?'Arpita':'Subham';
     const myChoice=d[currentUser];
     const theirChoice=d[partner];
+
+    if(d.phase==='countdown' && d.startedAt){
+      // Sync countdown from server timestamp so both devices count together
+      clearInterval(rpsTimerInt); clearInterval(rpsChooseTimer);
+      document.getElementById('rpsChoices').style.display='none';
+      document.getElementById('rpsResult').style.display='none';
+      document.getElementById('rpsWaiting').style.display='none';
+      rpsMyChoice=null;
+      const COUNTDOWN=3; // seconds before choices appear
+      function tickCountdown(){
+        const elapsed=Math.floor((Date.now()-d.startedAt)/1000);
+        const remaining=COUNTDOWN-elapsed;
+        if(remaining>0){
+          document.getElementById('rpsCountdown').innerHTML='<div class="rps-timer">'+remaining+'</div>';
+        } else if(remaining===0){
+          document.getElementById('rpsCountdown').innerHTML='<div class="rps-timer" style="font-size:32px">GO! \u{1f3af}</div>';
+        } else {
+          clearInterval(rpsTimerInt);
+          document.getElementById('rpsCountdown').innerHTML='';
+          document.getElementById('rpsChoices').style.display='block';
+          if(rtdb) rtdb.ref('games/rps').update({phase:'choosing'});
+          startRPSTimer();
+        }
+      }
+      tickCountdown();
+      clearInterval(rpsTimerInt);
+      rpsTimerInt=setInterval(tickCountdown,500);
+      return;
+    }
+
+    if(d.phase==='choosing'){
+      if(myChoice&&theirChoice&&d.phase==='reveal'){
+        // handled below
+      } else if(myChoice&&!theirChoice){
+        document.getElementById('rpsChoices').style.display='none';
+        document.getElementById('rpsWaiting').style.display='block';
+        document.getElementById('rpsWaitFor').textContent=partner;
+        document.getElementById('rpsResult').style.display='none';
+        clearInterval(rpsTimerInt);
+      }
+    }
+
     if(myChoice&&theirChoice&&d.phase==='reveal'){
       showRPSResult(myChoice,theirChoice,d.result);
-    } else if(myChoice&&!theirChoice&&d.phase==='choosing'){
+    } else if(d.phase==='choosing' && myChoice&&!theirChoice){
       document.getElementById('rpsChoices').style.display='none';
       document.getElementById('rpsWaiting').style.display='block';
       document.getElementById('rpsWaitFor').textContent=partner;
@@ -1235,30 +1282,16 @@ function listenRPS(){
   });
   rpsOff = ()=> ref.off('value', handler);
 }
-function startRPS(){
+async function startRPS(){
   rpsMyChoice=null;
   document.getElementById('rpsCountdown').innerHTML='';
   document.getElementById('rpsChoices').style.display='none';
   document.getElementById('rpsResult').style.display='none';
   document.getElementById('rpsWaiting').style.display='none';
-  if(rtdb) rtdb.ref('games/rps').update({phase:'countdown',Subham:null,Arpita:null,scores:rpsScores,result:null});
-  let count=3;
-  document.getElementById('rpsCountdown').innerHTML='<div class="rps-timer">'+count+'</div>';
-  clearInterval(rpsTimerInt);
-  rpsTimerInt=setInterval(()=>{
-    count--;
-    if(count>0){
-      document.getElementById('rpsCountdown').innerHTML='<div class="rps-timer">'+count+'</div>';
-    } else if(count===0){
-      document.getElementById('rpsCountdown').innerHTML='<div class="rps-timer" style="font-size:32px">GO! \u{1f3af}</div>';
-    } else {
-      clearInterval(rpsTimerInt);
-      document.getElementById('rpsCountdown').innerHTML='';
-      document.getElementById('rpsChoices').style.display='block';
-      if(rtdb) rtdb.ref('games/rps').update({phase:'choosing'});
-      startRPSTimer();
-    }
-  },1000);
+  if(rtdb){
+    // Write server timestamp so BOTH clients count down from the exact same moment
+    await rtdb.ref('games/rps').update({phase:'countdown',Subham:null,Arpita:null,scores:rpsScores,result:null,startedAt:firebase.database.ServerValue.TIMESTAMP});
+  }
 }
 function startRPSTimer(){
   let t=10;
