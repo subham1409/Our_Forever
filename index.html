@@ -1129,7 +1129,9 @@ function listenTTT(){
   const handler = ref.on('value', snap=>{
     if(snap.exists()){
       const d=snap.val();
-      tttBoard=d.board||Array(9).fill(null);
+      // Firebase strips null values from arrays, so rebuild as proper 9-element array
+      const rawBoard=d.board||{};
+      tttBoard=Array.from({length:9},(_,i)=>rawBoard[i]||null);
       tttTurn=d.turn||'Subham';
       tttScores=d.scores||{Subham:0,Arpita:0,draws:0};
       renderTTT();
@@ -1247,6 +1249,8 @@ function listenRPS(){
         } else {
           clearInterval(rpsTimerInt);
           document.getElementById('rpsCountdown').innerHTML='';
+          // Re-enable all buttons and clear previous selection before showing choices
+          document.querySelectorAll('.rps-btn').forEach(b=>{b.disabled=false;b.classList.remove('selected')});
           document.getElementById('rpsChoices').style.display='block';
           if(rtdb) rtdb.ref('games/rps').update({phase:'choosing'});
           startRPSTimer();
@@ -1288,6 +1292,8 @@ async function startRPS(){
   document.getElementById('rpsChoices').style.display='none';
   document.getElementById('rpsResult').style.display='none';
   document.getElementById('rpsWaiting').style.display='none';
+  // Reset buttons immediately so they're ready for next round
+  document.querySelectorAll('.rps-btn').forEach(b=>{b.disabled=false;b.classList.remove('selected')});
   if(rtdb){
     // Write server timestamp so BOTH clients count down from the exact same moment
     await rtdb.ref('games/rps').update({phase:'countdown',Subham:null,Arpita:null,scores:rpsScores,result:null,startedAt:firebase.database.ServerValue.TIMESTAMP});
