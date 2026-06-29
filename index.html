@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>Our Forever 💕</title>
+<meta name="theme-color" content="#e879a0"/>
+<link rel="manifest" href="#"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --pink:#e879a0;--pink2:#f43f8e;--purple:#9333ea;--lavender:#c084fc;
+  --peach:#fda4af;--rose:#fb7185;--bg:#fdf2f8;--card:#fff;
+  --text:#1e1b4b;--muted:#6b7280;--shadow:0 8px 32px rgba(232,121,160,0.18);
+  --r:18px;--rr:28px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden}
+.page{display:none;flex-direction:column;min-height:100dvh;animation:fadeIn .35s ease}
+.page.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes heartbeat{0%,100%{transform:scale(1)}14%{transform:scale(1.3)}28%{transform:scale(1)}42%{transform:scale(1.2)}70%{transform:scale(1)}}
+@keyframes confetti{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(500px) rotate(720deg);opacity:0}}
+@keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
+
+/* LOGIN */
+#loginPage{background:linear-gradient(135deg,#fce4ec,#f3e5f5,#e8eaf6);position:relative;justify-content:center;align-items:center;min-height:100dvh}
+.hearts-bg{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.heart-float{position:absolute;font-size:24px;animation:float 3s ease-in-out infinite;opacity:.3}
+.login-card{background:rgba(255,255,255,.72);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1.5px solid rgba(255,255,255,.8);border-radius:var(--rr);padding:36px 28px;width:min(340px,90vw);box-shadow:0 20px 60px rgba(147,51,234,.15);z-index:1;position:relative}
+.login-title{text-align:center;font-size:26px;font-weight:700;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.login-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:28px}
+.user-btn{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;background:rgba(255,255,255,.8);border:1.5px solid rgba(232,121,160,.25);border-radius:var(--r);cursor:pointer;transition:.2s;margin-bottom:10px}
+.user-btn:hover{background:#fff;border-color:var(--pink);transform:translateY(-2px);box-shadow:var(--shadow)}
+.avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.av1{background:linear-gradient(135deg,#f9a8d4,#c084fc);color:#fff}
+.av2{background:linear-gradient(135deg,#93c5fd,#a5b4fc);color:#fff}
+.user-info{text-align:left;flex:1}
+.user-name{font-weight:600;font-size:15px;color:var(--text)}
+.user-role{font-size:12px;color:var(--muted)}
+.pw-wrap{position:relative;margin-top:6px}
+.pw-input{width:100%;padding:12px 44px 12px 16px;border:1.5px solid rgba(232,121,160,.3);border-radius:var(--r);font-size:15px;outline:none;background:rgba(255,255,255,.9);transition:.2s}
+.pw-input:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(232,121,160,.15)}
+.pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:var(--muted)}
+.selected-user{background:linear-gradient(135deg,rgba(232,121,160,.1),rgba(147,51,234,.08));border-color:var(--pink)!important}
+.login-btn{width:100%;margin-top:16px;padding:14px;background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;border:none;border-radius:var(--r);font-size:16px;font-weight:600;cursor:pointer;transition:.2s;box-shadow:0 4px 20px rgba(232,121,160,.4)}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(232,121,160,.5)}
+.login-btn:active{transform:scale(.97)}
+.login-err{text-align:center;color:#e11d48;font-size:13px;margin-top:10px;min-height:20px}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(232,121,160,.15);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 8px;cursor:pointer;background:none;border:none;gap:3px;transition:.2s;position:relative}
+.nav-icon{font-size:22px;transition:.2s}
+.nav-label{font-size:10px;color:var(--muted);font-weight:500;transition:.2s}
+.nav-btn.active .nav-icon{transform:scale(1.15)}
+.nav-btn.active .nav-label{color:var(--pink);font-weight:700}
+.nav-dot{position:absolute;top:8px;right:calc(50% - 14px);width:7px;height:7px;background:var(--pink);border-radius:50%;display:none}
+.nav-dot.show{display:block}
+.main-content{padding-bottom:72px;flex:1}
+
+/* HEADER */
+.top-header{background:linear-gradient(135deg,var(--pink),var(--purple));padding:52px 20px 20px;color:#fff;position:relative;overflow:hidden}
+.top-header::after{content:'';position:absolute;bottom:-20px;left:0;right:0;height:40px;background:var(--bg);border-radius:40px 40px 0 0}
+.header-title{font-size:20px;font-weight:700;text-align:center}
+.header-sub{font-size:13px;text-align:center;opacity:.85;margin-top:4px}
+
+/* HOME */
+.welcome-section{padding:24px 20px 12px;text-align:center}
+.welcome-text{font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.online-bar{display:flex;justify-content:center;gap:20px;padding:12px 20px}
+.online-pill{display:flex;align-items:center;gap:6px;padding:6px 14px;background:#fff;border-radius:20px;box-shadow:0 2px 12px rgba(232,121,160,.1);font-size:13px;font-weight:500}
+.dot-online{width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite}
+.dot-offline{width:8px;height:8px;background:#94a3b8;border-radius:50%}
+.features-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:12px 20px 20px}
+.feat-card{background:#fff;border-radius:22px;padding:20px 16px;text-align:center;cursor:pointer;transition:.25s;box-shadow:0 4px 20px rgba(147,51,234,.08);animation:float 4s ease-in-out infinite;border:1.5px solid rgba(255,255,255,.8);position:relative;overflow:hidden}
+.feat-card:nth-child(2){animation-delay:.6s}
+.feat-card:nth-child(3){animation-delay:1.2s}
+.feat-card:nth-child(4){animation-delay:1.8s}
+.feat-card:hover{transform:translateY(-6px)!important;box-shadow:0 12px 36px rgba(147,51,234,.15)}
+.feat-card:active{transform:scale(.96)!important}
+.feat-icon{font-size:38px;margin-bottom:10px}
+.feat-title{font-size:14px;font-weight:600;color:var(--text)}
+.feat-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.feat-bg{position:absolute;inset:0;opacity:.06;font-size:80px;display:flex;align-items:center;justify-content:center;pointer-events:none}
+
+/* NOTIFICATION TOAST */
+.toast{position:fixed;top:env(safe-area-inset-top,16px);left:50%;transform:translateX(-50%) translateY(-100px);background:#fff;border-radius:16px;padding:12px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);min-width:260px;max-width:90vw}
+.toast.show{transform:translateX(-50%) translateY(8px)}
+.toast-icon{font-size:22px}
+.toast-text{font-size:13px;font-weight:500;color:var(--text)}
+
+/* MEMORIES */
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 8px}
+.section-title{font-size:18px;font-weight:700;color:var(--text)}
+.btn-add{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;border:none;border-radius:14px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:.2s}
+.btn-add:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.folders-scroll{display:flex;gap:10px;padding:8px 20px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.folders-scroll::-webkit-scrollbar{display:none}
+.folder-chip{padding:8px 16px;background:#fff;border:1.5px solid rgba(232,121,160,.2);border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:.2s;flex-shrink:0}
+.folder-chip.active{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;border-color:transparent}
+.gallery{columns:2;gap:10px;padding:10px 20px;column-gap:10px}
+.gallery-item{break-inside:avoid;margin-bottom:10px;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06);cursor:pointer;transition:.2s;position:relative}
+.gallery-item:hover{transform:scale(1.02)}
+.gallery-item img{width:100%;display:block;object-fit:cover}
+.gallery-info{padding:8px 10px 10px}
+.gallery-title{font-size:13px;font-weight:600;color:var(--text)}
+.gallery-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.gallery-del{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.9);border:none;border-radius:10px;padding:4px 8px;font-size:14px;cursor:pointer;backdrop-filter:blur(8px)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-icon{font-size:56px;margin-bottom:12px;opacity:.5}
+.empty-text{font-size:16px;font-weight:500}
+.empty-sub{font-size:13px;margin-top:6px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:28px 28px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;max-height:90dvh;overflow-y:auto;animation:slideUp .3s ease}
+.modal-handle{width:40px;height:4px;background:#e2e8f0;border-radius:4px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:18px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;display:block}
+.form-input,.form-select,.form-textarea{width:100%;padding:12px 14px;border:1.5px solid rgba(232,121,160,.2);border-radius:14px;font-size:15px;outline:none;font-family:inherit;background:#fdf2f8;transition:.2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--pink);background:#fff;box-shadow:0 0 0 3px rgba(232,121,160,.12)}
+.form-textarea{resize:vertical;min-height:80px}
+.photo-upload{width:100%;height:160px;border:2px dashed rgba(232,121,160,.4);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;background:rgba(253,242,248,.5);transition:.2s}
+.photo-upload:hover{border-color:var(--pink);background:rgba(232,121,160,.05)}
+.photo-preview{width:100%;height:160px;border-radius:16px;object-fit:cover}
+.modal-btns{display:flex;gap:10px;margin-top:18px}
+.btn-primary{flex:1;padding:14px;background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;transition:.2s}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.btn-secondary{flex:1;padding:14px;background:#f1f5f9;color:var(--text);border:none;border-radius:14px;font-size:15px;font-weight:500;cursor:pointer}
+
+/* NOTES */
+.notes-list{padding:10px 20px;display:flex;flex-direction:column;gap:10px}
+.note-card{background:#fff;border-radius:18px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.05);cursor:pointer;transition:.2s;border-left:4px solid var(--pink);animation:slideUp .3s ease}
+.note-card.pinned{border-left-color:var(--purple)}
+.note-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.1)}
+.note-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px}
+.note-preview{font-size:13px;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.note-meta{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.note-by{font-size:11px;color:var(--muted)}
+.note-pin{font-size:14px;cursor:pointer}
+.note-actions{display:flex;gap:8px}
+.note-del{background:none;border:none;font-size:16px;cursor:pointer;padding:2px}
+.search-bar{margin:8px 20px;padding:11px 16px;border:1.5px solid rgba(232,121,160,.2);border-radius:14px;font-size:14px;background:#fff;width:calc(100% - 40px);outline:none;font-family:inherit;transition:.2s}
+.search-bar:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(232,121,160,.1)}
+
+/* NOTE EDITOR */
+#noteEditor{position:fixed;inset:0;z-index:300;background:#fff;display:none;flex-direction:column}
+#noteEditor.open{display:flex}
+.editor-header{display:flex;align-items:center;gap:12px;padding:52px 16px 12px;background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff}
+.editor-back{background:rgba(255,255,255,.2);border:none;border-radius:12px;padding:8px 14px;color:#fff;font-size:14px;cursor:pointer}
+.editor-title-input{flex:1;background:transparent;border:none;outline:none;font-size:17px;font-weight:600;color:#fff;font-family:inherit}
+.editor-title-input::placeholder{color:rgba(255,255,255,.7)}
+.editor-body{flex:1;padding:16px 20px;font-size:15px;line-height:1.7;border:none;outline:none;resize:none;font-family:inherit;color:var(--text);background:#fff}
+.editor-footer{padding:12px 16px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;background:#fff;padding-bottom:env(safe-area-inset-bottom,12px)}
+.editor-meta{font-size:12px;color:var(--muted)}
+.editor-save{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;border:none;border-radius:12px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer}
+
+/* GAMES */
+.games-grid{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.game-card{background:#fff;border-radius:22px;padding:20px 14px;text-align:center;cursor:pointer;transition:.3s;box-shadow:0 4px 20px rgba(0,0,0,.06);border:1.5px solid rgba(255,255,255,.8);position:relative;overflow:hidden}
+.game-card:hover{transform:translateY(-6px);box-shadow:0 14px 40px rgba(147,51,234,.15)}
+.game-card:active{transform:scale(.97)}
+.game-icon{font-size:42px;margin-bottom:10px}
+.game-title{font-size:14px;font-weight:700;color:var(--text)}
+.game-score-badge{position:absolute;top:12px;right:12px;background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;border-radius:12px;padding:3px 9px;font-size:11px;font-weight:700}
+
+/* TTT */
+#tttGame{position:fixed;inset:0;z-index:300;background:var(--bg);display:none;flex-direction:column}
+#tttGame.open{display:flex}
+.game-header{background:linear-gradient(135deg,var(--pink),var(--purple));padding:52px 16px 20px;color:#fff;display:flex;align-items:center;gap:12px}
+.game-back{background:rgba(255,255,255,.2);border:none;border-radius:12px;padding:8px 14px;color:#fff;font-size:14px;cursor:pointer}
+.game-h-title{font-size:18px;font-weight:700;flex:1;text-align:center}
+.ttt-scores{display:flex;justify-content:space-around;padding:16px 20px;gap:10px}
+.score-box{flex:1;background:#fff;border-radius:16px;padding:12px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.score-name{font-size:13px;font-weight:600;color:var(--muted)}
+.score-num{font-size:28px;font-weight:700;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ttt-status{text-align:center;padding:8px 20px;font-size:15px;font-weight:600;color:var(--purple)}
+.ttt-board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 30px}
+.ttt-cell{aspect-ratio:1;background:#fff;border-radius:18px;border:2px solid rgba(232,121,160,.2);display:flex;align-items:center;justify-content:center;font-size:40px;cursor:pointer;transition:.2s;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.ttt-cell:hover:not(.taken){background:rgba(232,121,160,.07);transform:scale(1.05)}
+.ttt-cell.taken{cursor:default}
+.ttt-cell.win-cell{background:linear-gradient(135deg,rgba(232,121,160,.2),rgba(147,51,234,.2));border-color:var(--pink);animation:pulse .5s ease}
+.ttt-btns{display:flex;gap:10px;padding:0 20px}
+.btn-reset{flex:1;padding:13px;background:#f1f5f9;border:none;border-radius:14px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer}
+.btn-reset-scores{flex:1;padding:13px;background:#fee2e2;border:none;border-radius:14px;font-size:14px;font-weight:600;color:#dc2626;cursor:pointer}
+
+/* RPS */
+#rpsGame{position:fixed;inset:0;z-index:300;background:var(--bg);display:none;flex-direction:column}
+#rpsGame.open{display:flex}
+.rps-arena{flex:1;padding:16px 20px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.rps-timer{font-size:48px;font-weight:800;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:pulse 1s infinite}
+.rps-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.rps-btn{padding:16px 10px;background:#fff;border:2px solid rgba(232,121,160,.2);border-radius:20px;font-size:36px;cursor:pointer;transition:.25s;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+.rps-btn:hover:not(:disabled){transform:translateY(-4px);border-color:var(--pink);box-shadow:0 8px 24px rgba(232,121,160,.2)}
+.rps-btn:disabled{opacity:.5;cursor:default}
+.rps-btn.selected{background:linear-gradient(135deg,rgba(232,121,160,.15),rgba(147,51,234,.12));border-color:var(--purple)}
+.rps-label{font-size:11px;font-weight:600;color:var(--muted)}
+.rps-reveal{background:#fff;border-radius:22px;padding:20px;width:100%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.rps-vs{display:flex;align-items:center;justify-content:space-around;font-size:48px;margin:10px 0}
+.rps-result{font-size:22px;font-weight:700;color:var(--purple);margin-top:8px}
+.rps-scores-h{display:flex;justify-content:space-around;width:100%;gap:10px}
+
+/* DRAW */
+#drawGame{position:fixed;inset:0;z-index:300;background:var(--bg);display:none;flex-direction:column}
+#drawGame.open{display:flex}
+.draw-canvas-wrap{flex:1;background:#fff;margin:0 10px;border-radius:18px;overflow:hidden;position:relative;touch-action:none}
+#drawCanvas{width:100%;height:100%;cursor:crosshair}
+.draw-controls{padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.color-btn{width:30px;height:30px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:.2s;flex-shrink:0}
+.color-btn.active{border-color:var(--text);transform:scale(1.2)}
+.brush-sizes{display:flex;gap:6px;align-items:center}
+.brush-sz{background:#fff;border:2px solid rgba(232,121,160,.3);border-radius:10px;padding:6px 10px;font-size:12px;cursor:pointer;transition:.2s}
+.brush-sz.active{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;border-color:transparent}
+.draw-action-btns{display:flex;gap:8px;margin-left:auto}
+.draw-btn{padding:7px 12px;background:#f1f5f9;border:none;border-radius:10px;font-size:13px;cursor:pointer;font-weight:500}
+.guess-input-wrap{padding:8px 14px 14px;display:flex;gap:8px}
+.guess-input{flex:1;padding:11px 14px;border:2px solid rgba(232,121,160,.3);border-radius:14px;font-size:14px;outline:none;font-family:inherit}
+.guess-input:focus{border-color:var(--pink)}
+.draw-word{text-align:center;padding:8px;font-size:16px;font-weight:700;color:var(--purple)}
+.confirm-btns{display:flex;gap:10px;padding:0 14px 10px}
+.confirm-yes{flex:1;padding:12px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;border-radius:14px;font-weight:600;cursor:pointer;font-size:15px}
+.confirm-no{flex:1;padding:12px;background:#fee2e2;color:#dc2626;border:none;border-radius:14px;font-weight:600;cursor:pointer;font-size:15px}
+
+/* PROFILE */
+.profile-hero{background:linear-gradient(135deg,var(--pink),var(--purple));padding:52px 20px 40px;text-align:center;color:#fff;position:relative}
+.profile-avatar{width:84px;height:84px;border-radius:50%;border:4px solid rgba(255,255,255,.5);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:36px;background:rgba(255,255,255,.2)}
+.profile-name{font-size:22px;font-weight:700}
+.profile-status{display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;opacity:.9;margin-top:4px}
+.profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:20px}
+.stat-card{background:#fff;border-radius:16px;padding:14px 10px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+.stat-num{font-size:24px;font-weight:700;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-lbl{font-size:11px;color:var(--muted);font-weight:500;margin-top:3px}
+.profile-section{padding:0 20px 20px}
+.profile-item{background:#fff;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+.profile-item-icon{font-size:22px;width:36px;text-align:center}
+.profile-item-info{flex:1}
+.profile-item-label{font-size:13px;color:var(--muted);font-weight:500}
+.profile-item-val{font-size:15px;font-weight:600;color:var(--text)}
+.logout-btn{width:100%;margin:0 0 16px;padding:14px;background:#fee2e2;border:none;border-radius:14px;color:#dc2626;font-size:15px;font-weight:600;cursor:pointer;transition:.2s}
+.logout-btn:hover{background:#fecaca}
+
+/* CONFETTI */
+.confetti-piece{position:fixed;width:10px;height:10px;border-radius:2px;pointer-events:none;z-index:999;animation:confetti 2.5s ease forwards}
+
+/* RIPPLE */
+.ripple-effect{position:absolute;border-radius:50%;background:rgba(255,255,255,.4);animation:ripple .6s ease-out forwards;pointer-events:none}
+
+/* LOADING */
+.loader{display:flex;align-items:center;justify-content:center;padding:30px;flex-direction:column;gap:12px}
+.loader-spin{width:32px;height:32px;border:3px solid rgba(232,121,160,.2);border-top-color:var(--pink);border-radius:50%;animation:spin .7s linear infinite}
+.loader-text{font-size:13px;color:var(--muted)}
+
+.image-viewer{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.95);display:none;flex-direction:column;align-items:center;justify-content:center}
+.image-viewer.open{display:flex}
+.viewer-img{max-width:100%;max-height:85dvh;border-radius:12px;object-fit:contain}
+.viewer-close{position:absolute;top:env(safe-area-inset-top,16px);right:16px;background:rgba(255,255,255,.15);border:none;border-radius:12px;padding:8px 14px;color:#fff;font-size:20px;cursor:pointer}
+.viewer-info{color:#fff;text-align:center;padding:12px 20px}
+.viewer-title{font-size:16px;font-weight:600}
+.viewer-meta{font-size:12px;opacity:.7;margin-top:4px}
+
+.progress-bar{height:3px;background:linear-gradient(135deg,var(--pink),var(--purple));position:fixed;top:0;left:0;z-index:999;transition:width .3s ease;display:none}
+
+.tag{display:inline-block;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600}
+.tag-pink{background:rgba(232,121,160,.12);color:var(--pink)}
+.tag-purple{background:rgba(147,51,234,.1);color:var(--purple)}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toastIcon">💕</span>
+  <span class="toast-text" id="toastText">Hello!</span>
+</div>
+
+<!-- IMAGE VIEWER -->
+<div class="image-viewer" id="imageViewer">
+  <button class="viewer-close" onclick="closeViewer()">✕</button>
+  <img class="viewer-img" id="viewerImg" src="" alt=""/>
+  <div class="viewer-info">
+    <div class="viewer-title" id="viewerTitle"></div>
+    <div class="viewer-meta" id="viewerMeta"></div>
+  </div>
+</div>
+
+<!-- LOGIN PAGE -->
+<div class="page active" id="loginPage">
+  <div class="hearts-bg" id="heartsBg"></div>
+
+  <!-- GATE: shown first, hides names -->
+  <div class="login-card" id="gateCard">
+    <div class="login-title">💕 Our Forever</div>
+    <div class="login-sub">Enter the secret key to continue 🔐</div>
+    <div style="margin-top:8px">
+      <div class="pw-wrap">
+        <input class="pw-input" id="gateInput" type="password" placeholder="Secret key..." autocomplete="off"/>
+        <button class="pw-toggle" onclick="toggleGatePw()">👁️</button>
+      </div>
+    </div>
+    <button class="login-btn" onclick="checkGate()">🔓 Continue</button>
+    <div class="login-err" id="gateErr"></div>
+  </div>
+
+  <!-- USER SELECT: shown after gate passes -->
+  <div class="login-card" id="userCard" style="display:none">
+    <div class="login-title">💕 Our Forever</div>
+    <div class="login-sub">Who are you? 💕</div>
+    <div id="userSelect">
+      <div class="user-btn" id="btn-subham" onclick="selectUser('Subham')">
+        <div class="avatar av1">S</div>
+        <div class="user-info">
+          <div class="user-name">Subham</div>
+          <div class="user-role">Tap to select</div>
+        </div>
+        <span>💙</span>
+      </div>
+      <div class="user-btn" id="btn-arpita" onclick="selectUser('Arpita')">
+        <div class="avatar av2">A</div>
+        <div class="user-info">
+          <div class="user-name">Arpita</div>
+          <div class="user-role">Tap to select</div>
+        </div>
+        <span>💗</span>
+      </div>
+    </div>
+    <div id="pwSection" style="display:none;margin-top:14px">
+      <div class="pw-wrap">
+        <input class="pw-input" id="pwInput" type="password" placeholder="Enter your password..." autocomplete="current-password"/>
+        <button class="pw-toggle" onclick="togglePw()" id="pwToggle">👁️</button>
+      </div>
+    </div>
+    <button class="login-btn" onclick="doLogin()">💕 Enter Our World</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- HOME PAGE -->
+<div class="page" id="homePage">
+  <div class="main-content">
+    <div class="top-header">
+      <div class="header-title">💕 Our Forever</div>
+      <div class="header-sub" id="headerSub">Welcome back!</div>
+    </div>
+    <div class="welcome-section">
+      <div class="welcome-text" id="welcomeText">Welcome ❤️</div>
+    </div>
+    <div class="online-bar">
+      <div class="online-pill" id="subhamStatus">
+        <span class="dot-offline" id="subhamDot"></span>
+        <span>Subham</span>
+      </div>
+      <div class="online-pill" id="arpitaStatus">
+        <span class="dot-offline" id="arpitaDot"></span>
+        <span>Arpita</span>
+      </div>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card" onclick="navigateTo('memories')">
+        <div class="feat-bg">📸</div>
+        <div class="feat-icon">❤️</div>
+        <div class="feat-title">Memories</div>
+        <div class="feat-sub">Our photo album</div>
+      </div>
+      <div class="feat-card" onclick="navigateTo('notes')">
+        <div class="feat-bg">📝</div>
+        <div class="feat-icon">📝</div>
+        <div class="feat-title">Notes</div>
+        <div class="feat-sub">Shared thoughts</div>
+      </div>
+      <div class="feat-card" onclick="navigateTo('games')">
+        <div class="feat-bg">🎮</div>
+        <div class="feat-icon">🎮</div>
+        <div class="feat-title">Games</div>
+        <div class="feat-sub">Play together</div>
+      </div>
+      <div class="feat-card" onclick="navigateTo('profile')">
+        <div class="feat-bg">👤</div>
+        <div class="feat-icon">👤</div>
+        <div class="feat-title">Profile</div>
+        <div class="feat-sub">Your space</div>
+      </div>
+    </div>
+  </div>
+  <div id="tabContents" style="display:none"><!-- TABS -->
+
+<!-- MEMORIES TAB -->
+<div id="tabMemories" style="padding-bottom:72px">
+  <div class="top-header"><div class="header-title">📸 Memories</div><div class="header-sub">Forever captured moments</div></div>
+  <div class="section-header">
+    <div class="section-title">Albums</div>
+    <button class="btn-add" onclick="openAddMemoryModal()">+ Add Photo</button>
+  </div>
+  <div class="folders-scroll" id="foldersScroll">
+    <div class="folder-chip active" data-folder="All" onclick="filterFolder('All',this)">All</div>
+    <div class="folder-chip" data-folder="Trips" onclick="filterFolder('Trips',this)">✈️ Trips</div>
+    <div class="folder-chip" data-folder="Birthday" onclick="filterFolder('Birthday',this)">🎂 Birthday</div>
+    <div class="folder-chip" data-folder="Selfies" onclick="filterFolder('Selfies',this)">🤳 Selfies</div>
+    <div class="folder-chip" data-folder="Funny" onclick="filterFolder('Funny',this)">😂 Funny</div>
+    <div class="folder-chip" data-folder="Special" onclick="filterFolder('Special',this)">⭐ Special</div>
+    <div class="folder-chip" data-folder="Anniversary" onclick="filterFolder('Anniversary',this)">💍 Anniversary</div>
+    <div class="folder-chip" data-folder="Custom" onclick="filterFolder('Custom',this)">📁 Custom</div>
+  </div>
+  <div class="gallery" id="gallery"></div>
+</div>
+
+<!-- NOTES TAB -->
+<div id="tabNotes" style="padding-bottom:72px">
+  <div class="top-header"><div class="header-title">📝 Notes</div><div class="header-sub">Our shared notebook</div></div>
+  <div class="section-header">
+    <div class="section-title">Notes</div>
+    <button class="btn-add" onclick="openNewNote()">+ New Note</button>
+  </div>
+  <input class="search-bar" id="notesSearch" placeholder="🔍 Search notes..." oninput="filterNotes()"/>
+  <div class="notes-list" id="notesList"></div>
+</div>
+
+<!-- GAMES TAB -->
+<div id="tabGames" style="padding-bottom:72px">
+  <div class="top-header"><div class="header-title">🎮 Games</div><div class="header-sub">Play together, stay connected</div></div>
+  <div class="games-grid">
+    <div class="game-card" onclick="openTTT()">
+      <div class="game-icon">⭕</div>
+      <div class="game-title">Tic Tac Toe</div>
+      <div class="game-score-badge" id="tttBadge">0-0</div>
+    </div>
+    <div class="game-card" onclick="openDraw()">
+      <div class="game-icon">🎨</div>
+      <div class="game-title">Draw & Guess</div>
+      <div class="game-score-badge" id="drawBadge">0-0</div>
+    </div>
+    <div class="game-card" onclick="openRPS()">
+      <div class="game-icon">✌️</div>
+      <div class="game-title">Rock Paper Scissors</div>
+      <div class="game-score-badge" id="rpsBadge">0-0</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE TAB -->
+<div id="tabProfile" style="padding-bottom:72px">
+  <div class="profile-hero">
+    <div class="profile-avatar" id="profileAvatar">S</div>
+    <div class="profile-name" id="profileName">Subham</div>
+    <div class="profile-status"><span class="dot-online" style="background:#22c55e;width:8px;height:8px;border-radius:50%;display:inline-block"></span><span id="profileStatusTxt">Online</span></div>
+  </div>
+  <div class="profile-stats">
+    <div class="stat-card"><div class="stat-num" id="statPhotos">0</div><div class="stat-lbl">📸 Photos</div></div>
+    <div class="stat-card"><div class="stat-num" id="statNotes">0</div><div class="stat-lbl">📝 Notes</div></div>
+    <div class="stat-card"><div class="stat-num" id="statWins">0</div><div class="stat-lbl">🏆 Wins</div></div>
+  </div>
+  <div class="profile-section">
+    <div class="profile-item"><span class="profile-item-icon">💕</span><div class="profile-item-info"><div class="profile-item-label">In love with</div><div class="profile-item-val" id="partnerName">—</div></div></div>
+    <div class="profile-item"><span class="profile-item-icon">📅</span><div class="profile-item-info"><div class="profile-item-label">Joined</div><div class="profile-item-val" id="joinedDate">—</div></div></div>
+    <div class="profile-item"><span class="profile-item-icon">🕒</span><div class="profile-item-info"><div class="profile-item-label">Last seen</div><div class="profile-item-val" id="lastSeenVal">Just now</div></div></div>
+    <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+  </div>
+</div>
+
+  </div><!-- end tabContents -->
+  <div class="bottom-nav" id="bottomNav">
+    <button class="nav-btn active" data-tab="home" onclick="switchTab('home')">
+      <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
+    </button>
+    <button class="nav-btn" data-tab="memories" onclick="switchTab('memories')">
+      <span class="nav-icon">❤️</span><span class="nav-label">Memories</span>
+      <span class="nav-dot" id="memDot"></span>
+    </button>
+    <button class="nav-btn" data-tab="notes" onclick="switchTab('notes')">
+      <span class="nav-icon">📝</span><span class="nav-label">Notes</span>
+      <span class="nav-dot" id="notesDot"></span>
+    </button>
+    <button class="nav-btn" data-tab="games" onclick="switchTab('games')">
+      <span class="nav-icon">🎮</span><span class="nav-label">Games</span>
+    </button>
+    <button class="nav-btn" data-tab="profile" onclick="switchTab('profile')">
+      <span class="nav-icon">👤</span><span class="nav-label">Profile</span>
+    </button>
+  </div>
+</div>
+
+<!-- ADD MEMORY MODAL -->
+<div class="modal-overlay" id="memoryModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📸 Add Memory</div>
+    <div class="form-group">
+      <label class="form-label">Photo</label>
+      <input type="file" id="photoFile" accept="image/*" style="display:none" onchange="previewPhoto(event)"/>
+      <img id="photoPreviewImg" class="photo-preview" style="display:none" src="" alt=""/>
+      <div class="photo-upload" id="photoUploadBtn" onclick="document.getElementById('photoFile').click()">
+        <span style="font-size:36px">📷</span>
+        <span style="font-size:14px;color:var(--muted)">Tap to choose photo</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Title</label>
+      <input class="form-input" id="memTitle" placeholder="Give this memory a name..."/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Album</label>
+      <select class="form-select" id="memFolder">
+        <option value="Selfies">🤳 Selfies</option>
+        <option value="Trips">✈️ Trips</option>
+        <option value="Birthday">🎂 Birthday</option>
+        <option value="Funny">😂 Funny</option>
+        <option value="Special">⭐ Special</option>
+        <option value="Anniversary">💍 Anniversary</option>
+        <option value="Custom">📁 Custom</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description (optional)</label>
+      <textarea class="form-textarea" id="memDesc" placeholder="A little story about this moment..."></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeModal('memoryModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveMemory()">💾 Save Memory</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE EDITOR -->
+<div id="noteEditor">
+  <div class="editor-header">
+    <button class="editor-back" onclick="closeNoteEditor()">← Back</button>
+    <input class="editor-title-input" id="editorTitle" placeholder="Note title..."/>
+    <button class="editor-save" onclick="saveNote()">Save</button>
+  </div>
+  <textarea class="editor-body" id="editorBody" placeholder="Start writing your thoughts... ✨ You can use emojis 💕"></textarea>
+  <div class="editor-footer">
+    <span class="editor-meta" id="editorMeta">New note</span>
+    <span style="font-size:13px;color:var(--muted)" id="editorSaved"></span>
+  </div>
+</div>
+
+<!-- TTT GAME -->
+<div id="tttGame">
+  <div class="game-header">
+    <button class="game-back" onclick="closeTTT()">← Back</button>
+    <div class="game-h-title">⭕ Tic Tac Toe</div>
+    <button onclick="resetTTTScores()" style="background:rgba(255,255,255,.2);border:none;border-radius:12px;padding:8px 12px;color:#fff;font-size:12px;cursor:pointer">Reset All</button>
+  </div>
+  <div class="ttt-scores">
+    <div class="score-box"><div class="score-name">🙋 Subham</div><div class="score-num" id="tttS">0</div></div>
+    <div class="score-box"><div class="score-name">🤝 Draws</div><div class="score-num" id="tttD">0</div></div>
+    <div class="score-box"><div class="score-name">Arpita 🙋</div><div class="score-num" id="tttA">0</div></div>
+  </div>
+  <div class="ttt-status" id="tttStatus">Subham's turn (❌)</div>
+  <div class="ttt-board" id="tttBoard"></div>
+  <div class="ttt-btns">
+    <button class="btn-reset" onclick="resetTTT()">🔄 New Game</button>
+  </div>
+</div>
+
+<!-- RPS GAME -->
+<div id="rpsGame">
+  <div class="game-header">
+    <button class="game-back" onclick="closeRPS()">← Back</button>
+    <div class="game-h-title">✌️ Rock Paper Scissors</div>
+    <button onclick="resetRPSScores()" style="background:rgba(255,255,255,.2);border:none;border-radius:12px;padding:8px 12px;color:#fff;font-size:12px;cursor:pointer">Reset</button>
+  </div>
+  <div class="rps-arena">
+    <div class="rps-scores-h">
+      <div class="score-box" style="flex:1"><div class="score-name">Subham</div><div class="score-num" id="rpsS">0</div></div>
+      <div class="score-box" style="flex:1"><div class="score-name">Arpita</div><div class="score-num" id="rpsA">0</div></div>
+    </div>
+    <div id="rpsCountdown" style="text-align:center;padding:20px 0"></div>
+    <div id="rpsChoices" style="display:none;width:100%">
+      <div style="text-align:center;font-size:15px;font-weight:600;color:var(--purple);margin-bottom:12px" id="rpsPrompt">Choose!</div>
+      <div class="rps-choices">
+        <button class="rps-btn" onclick="rpsChoose('🪨')"><span>🪨</span><span class="rps-label">Rock</span></button>
+        <button class="rps-btn" onclick="rpsChoose('📄')"><span>📄</span><span class="rps-label">Paper</span></button>
+        <button class="rps-btn" onclick="rpsChoose('✂️')"><span>✂️</span><span class="rps-label">Scissors</span></button>
+      </div>
+    </div>
+    <div id="rpsResult" style="display:none;width:100%">
+      <div class="rps-reveal">
+        <div class="rps-vs" id="rpsVsDisplay"></div>
+        <div class="rps-result" id="rpsResultText"></div>
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:14px" onclick="startRPS()">🔄 Play Again</button>
+    </div>
+    <div id="rpsWaiting" style="display:none;text-align:center;padding:20px">
+      <div style="font-size:32px">⏳</div>
+      <div style="font-size:15px;font-weight:600;color:var(--muted);margin-top:8px">Waiting for <span id="rpsWaitFor"></span>...</div>
+    </div>
+  </div>
+</div>
+
+<!-- DRAW GAME -->
+<div id="drawGame">
+  <div class="game-header">
+    <button class="game-back" onclick="closeDraw()">← Back</button>
+    <div class="game-h-title">🎨 Draw & Guess</div>
+    <button onclick="resetDrawScores()" style="background:rgba(255,255,255,.2);border:none;border-radius:12px;padding:8px 12px;color:#fff;font-size:12px;cursor:pointer">Reset</button>
+  </div>
+  <div style="display:flex;justify-content:space-around;padding:10px 16px">
+    <div class="score-box" style="flex:1;margin:0 4px"><div class="score-name">Subham</div><div class="score-num" id="drawS">0</div></div>
+    <div class="score-box" style="flex:1;margin:0 4px"><div class="score-name">Arpita</div><div class="score-num" id="drawA">0</div></div>
+  </div>
+  <div id="drawStatus" style="text-align:center;padding:4px;font-size:14px;font-weight:600;color:var(--purple)"></div>
+  <div class="draw-canvas-wrap">
+    <canvas id="drawCanvas"></canvas>
+  </div>
+  <div class="draw-controls">
+    <div style="display:flex;gap:6px">
+      <div class="color-btn active" style="background:#1e1b4b" data-color="#1e1b4b" onclick="setColor(this)"></div>
+      <div class="color-btn" style="background:#e879a0" data-color="#e879a0" onclick="setColor(this)"></div>
+      <div class="color-btn" style="background:#9333ea" data-color="#9333ea" onclick="setColor(this)"></div>
+      <div class="color-btn" style="background:#22c55e" data-color="#22c55e" onclick="setColor(this)"></div>
+      <div class="color-btn" style="background:#f59e0b" data-color="#f59e0b" onclick="setColor(this)"></div>
+      <div class="color-btn" style="background:#ef4444" data-color="#ef4444" onclick="setColor(this)"></div>
+      <div class="color-btn" style="background:#fff;border:2px solid #ccc" data-color="#ffffff" onclick="setColor(this)"></div>
+    </div>
+    <div class="brush-sizes">
+      <div class="brush-sz active" data-size="4" onclick="setBrush(this)">S</div>
+      <div class="brush-sz" data-size="10" onclick="setBrush(this)">M</div>
+      <div class="brush-sz" data-size="20" onclick="setBrush(this)">L</div>
+    </div>
+    <div class="draw-action-btns">
+      <button class="draw-btn" onclick="undoDrawing()">↩️</button>
+      <button class="draw-btn" onclick="clearCanvas()">🗑️</button>
+    </div>
+  </div>
+  <div id="drawerSection" style="display:none">
+    <div class="draw-word" id="drawWordDisplay"></div>
+    <div style="text-align:center;font-size:13px;color:var(--muted);padding:0 14px 8px">You are drawing. Wait for partner to guess!</div>
+    <div id="confirmSection" style="display:none">
+      <div style="text-align:center;font-size:14px;font-weight:600;color:var(--text);padding:8px">Partner guessed: <span id="partnerGuess" style="color:var(--purple)"></span><br/>Correct?</div>
+      <div class="confirm-btns">
+        <button class="confirm-yes" onclick="confirmGuess(true)">✅ Yes!</button>
+        <button class="confirm-no" onclick="confirmGuess(false)">❌ No</button>
+      </div>
+    </div>
+  </div>
+  <div id="guesserSection" style="display:none">
+    <div style="text-align:center;font-size:13px;color:var(--muted);padding:4px 14px">What is being drawn? Take a guess!</div>
+    <div class="guess-input-wrap">
+      <input class="guess-input" id="guessInput" placeholder="Type your guess..." onkeydown="if(event.key==='Enter')submitGuess()"/>
+      <button class="btn-primary" style="padding:11px 16px;flex-shrink:0" onclick="submitGuess()">Send</button>
+    </div>
+  </div>
+  <div id="drawWaitSection" style="text-align:center;padding:14px;color:var(--muted);font-size:14px">Loading game state...</div>
+  <div id="drawStartSection" style="display:none;padding:10px 14px">
+    <button class="btn-primary" style="width:100%" onclick="startDrawRound()">🎨 Start New Round</button>
+  </div>
+</div>
+
+<script>
+(function(){
+// ===== FIREBASE CONFIG =====
+const FB_CONFIG = {
+  apiKey:"AIzaSyBoEEbTfxefZvyBIyvaEKAt7pYhn0uFWbQ",
+  authDomain:"chat-group-769df.firebaseapp.com",
+  projectId:"chat-group-769df",
+  storageBucket:"chat-group-769df.firebasestorage.app",
+  messagingSenderId:"946983859352",
+  appId:"1:946983859352:web:b9cdfc901d2c1650824ced"
+};
+
+const USERS = {
+  Subham:{password:"Aram1702",emoji:"💙",av:"av1",letter:"S"},
+  Arpita:{password:"Aram2702",emoji:"💗",av:"av2",letter:"A"}
+};
+
+let db,storage,currentUser=null,selectedUser=null,activeTab='home';
+let memoriesData=[],notesData=[],currentFolder='All',noteSearchQ='';
+let tttBoard=Array(9).fill(null),tttTurn='Subham',tttScores={Subham:0,Arpita:0,draws:0};
+let tttUnsub=null,notesUnsub=null,memoriesUnsub=null,presenceUnsub=null;
+let rpsScores={Subham:0,Arpita:0};
+let rpsMyChoice=null,rpsTheirChoice=null,rpsTimerInt=null;
+let drawScores={Subham:0,Arpita:0};
+let drawCtx,drawColor='#1e1b4b',brushSize=4,drawHistory=[],isDrawing=false;
+let currentNoteId=null,editingNoteId=null;
+let drawUnsub=null,rpsUnsub=null;
+
+// ===== FIREBASE INIT =====
+async function initFirebase(){
+  const scripts=[
+    'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
+    'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js',
+    'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js'
+  ];
+  for(const src of scripts){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src=src;s.onload=res;s.onerror=rej;
+      document.head.appendChild(s);
+    });
+  }
+  firebase.initializeApp(FB_CONFIG);
+  db=firebase.firestore();
+  storage=firebase.storage();
+  loadFloatingHearts();
+  listenPresence();
+  loadGameScores();
+}
+
+// ===== GATE =====
+function toggleGatePw(){
+  const inp=document.getElementById('gateInput');
+  inp.type=inp.type==='password'?'text':'password';
+}
+function checkGate(){
+  const pw=document.getElementById('gateInput').value.trim();
+  const valid=Object.values(USERS).some(u=>u.password===pw);
+  if(valid){
+    document.getElementById('gateCard').style.display='none';
+    document.getElementById('userCard').style.display='block';
+  } else {
+    document.getElementById('gateErr').textContent='Wrong key! Try again 🔒';
+    document.getElementById('gateInput').value='';
+    document.getElementById('gateInput').classList.add('shake');
+    setTimeout(()=>document.getElementById('gateInput').classList.remove('shake'),500);
+  }
+}
+
+// ===== LOGIN =====
+function selectUser(name){
+  selectedUser=name;
+  document.querySelectorAll('.user-btn').forEach(b=>b.classList.remove('selected-user'));
+  document.getElementById('btn-'+name.toLowerCase()).classList.add('selected-user');
+  document.getElementById('pwSection').style.display='block';
+  document.getElementById('pwInput').focus();
+  document.getElementById('loginErr').textContent='';
+}
+function togglePw(){
+  const inp=document.getElementById('pwInput');
+  inp.type=inp.type==='password'?'text':'password';
+}
+function doLogin(){
+  if(!selectedUser){showErr('Please select who you are! 💕');return}
+  const pw=document.getElementById('pwInput').value;
+  if(pw===USERS[selectedUser].password){
+    currentUser=selectedUser;
+    document.getElementById('loginErr').textContent='';
+    enterApp();
+  } else {
+    showErr('Wrong password! Try again 🔒');
+    document.getElementById('pwInput').value='';
+    document.getElementById('pwInput').classList.add('shake');
+    setTimeout(()=>document.getElementById('pwInput').classList.remove('shake'),500);
+  }
+}
+document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+function showErr(m){document.getElementById('loginErr').textContent=m}
+
+function enterApp(){
+  setPresence(true);
+  document.getElementById('loginPage').classList.remove('active');
+  document.getElementById('homePage').classList.add('active');
+  updateUI();
+  switchTab('home');
+  listenMemories();
+  listenNotes();
+  showToast('💕','Welcome back, '+currentUser+'!');
+}
+
+function updateUI(){
+  const partner=currentUser==='Subham'?'Arpita':'Subham';
+  document.getElementById('welcomeText').textContent='Welcome '+currentUser+' ❤️ '+partner;
+  document.getElementById('headerSub').textContent='Your private world 💕';
+  const av=USERS[currentUser];
+  document.getElementById('profileAvatar').textContent=av.letter;
+  document.getElementById('profileAvatar').className='profile-avatar '+(av.av==='av1'?'':'');
+  document.getElementById('profileAvatar').style.background=av.av==='av1'?'linear-gradient(135deg,#f9a8d4,#c084fc)':'linear-gradient(135deg,#93c5fd,#a5b4fc)';
+  document.getElementById('profileName').textContent=currentUser;
+  document.getElementById('partnerName').textContent=partner+' 💕';
+  document.getElementById('joinedDate').textContent=new Date().toLocaleDateString('en-IN',{year:'numeric',month:'long'});
+}
+
+// ===== PRESENCE =====
+function setPresence(online){
+  if(!db||!currentUser)return;
+  db.collection('presence').doc(currentUser).set({online,lastSeen:firebase.firestore.FieldValue.serverTimestamp()});
+}
+function listenPresence(){
+  if(!db)return;
+  db.collection('presence').onSnapshot(snap=>{
+    snap.forEach(doc=>{
+      const n=doc.id,d=doc.data();
+      const dot=document.getElementById(n.toLowerCase()+'Dot');
+      if(dot){dot.className=d.online?'dot-online':'dot-offline'}
+    });
+  });
+}
+
+// ===== FLOATING HEARTS =====
+function loadFloatingHearts(){
+  const c=document.getElementById('heartsBg');
+  if(!c)return;
+  const hearts=['💕','❤️','💗','💖','💓','💞','🌸','✨'];
+  for(let i=0;i<18;i++){
+    const h=document.createElement('div');
+    h.className='heart-float';
+    h.textContent=hearts[Math.floor(Math.random()*hearts.length)];
+    h.style.left=Math.random()*100+'%';
+    h.style.top=Math.random()*100+'%';
+    h.style.fontSize=(16+Math.random()*20)+'px';
+    h.style.animationDelay=Math.random()*4+'s';
+    h.style.animationDuration=(3+Math.random()*4)+'s';
+    c.appendChild(h);
+  }
+}
+
+// ===== TAB NAVIGATION =====
+function switchTab(tab){
+  activeTab=tab;
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.tab===tab);
+  });
+  const homeMain=document.querySelector('#homePage .main-content');
+  const tabContents=document.getElementById('tabContents');
+  if(tab==='home'){
+    homeMain.style.display='block';
+    tabContents.style.display='none';
+  } else {
+    homeMain.style.display='none';
+    tabContents.style.display='block';
+    ['memories','notes','games','profile'].forEach(t=>{
+      const el=document.getElementById('tab'+capitalize(t));
+      if(el) el.style.display=(t===tab)?'block':'none';
+    });
+  }
+  if(tab==='profile')refreshProfile();
+  if(tab==='games')refreshGameBadges();
+}
+function navigateTo(tab){switchTab(tab)}
+function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+
+// ===== TOAST =====
+let toastTimer;
+function showToast(icon,text){
+  const t=document.getElementById('toast');
+  document.getElementById('toastIcon').textContent=icon;
+  document.getElementById('toastText').textContent=text;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+// ===== MEMORIES =====
+function listenMemories(){
+  if(!db)return;
+  if(memoriesUnsub)memoriesUnsub();
+  memoriesUnsub=db.collection('memories').orderBy('date','desc').onSnapshot(snap=>{
+    memoriesData=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderGallery();
+    updateProfileStats();
+  });
+}
+function filterFolder(folder,el){
+  currentFolder=folder;
+  document.querySelectorAll('.folder-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderGallery();
+}
+function renderGallery(){
+  const g=document.getElementById('gallery');
+  const filtered=currentFolder==='All'?memoriesData:memoriesData.filter(m=>m.folder===currentFolder);
+  if(!filtered.length){
+    g.innerHTML=`<div class="empty-state" style="column-span:all"><div class="empty-icon">📷</div><div class="empty-text">No memories yet</div><div class="empty-sub">Tap + to add your first photo 💕</div></div>`;
+    return;
+  }
+  g.innerHTML=filtered.map(m=>`
+    <div class="gallery-item" onclick="openViewer('${m.id}')">
+      <img src="${m.url||m.dataUrl}" alt="${m.title}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23f3e5f5%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2230%22%3E📷%3C/text%3E%3C/svg%3E'"/>
+      <div class="gallery-info">
+        <div class="gallery-title">${m.title}</div>
+        <div class="gallery-meta">${m.uploadedBy} · ${formatDate(m.date)}</div>
+      </div>
+      <button class="gallery-del" onclick="event.stopPropagation();deleteMemory('${m.id}')">🗑️</button>
+    </div>
+  `).join('');
+}
+function openAddMemoryModal(){
+  document.getElementById('memTitle').value='';
+  document.getElementById('memDesc').value='';
+  document.getElementById('photoFile').value='';
+  document.getElementById('photoPreviewImg').style.display='none';
+  document.getElementById('photoUploadBtn').style.display='flex';
+  openModal('memoryModal');
+}
+function previewPhoto(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    document.getElementById('photoPreviewImg').src=ev.target.result;
+    document.getElementById('photoPreviewImg').style.display='block';
+    document.getElementById('photoUploadBtn').style.display='none';
+  };
+  r.readAsDataURL(f);
+}
+async function saveMemory(){
+  const title=document.getElementById('memTitle').value.trim();
+  const folder=document.getElementById('memFolder').value;
+  const desc=document.getElementById('memDesc').value.trim();
+  const file=document.getElementById('photoFile').files[0];
+  if(!title){showToast('⚠️','Please add a title!');return}
+  if(!file){showToast('⚠️','Please select a photo!');return}
+  showProgress();
+  try{
+    const dataUrl=await new Promise(res=>{
+      const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(file);
+    });
+    await db.collection('memories').add({
+      title,folder,desc,uploadedBy:currentUser,
+      date:firebase.firestore.FieldValue.serverTimestamp(),
+      dataUrl
+    });
+    closeModal('memoryModal');
+    showToast('📸',currentUser+' added a new memory!');
+    hideProgress();
+  }catch(err){
+    hideProgress();
+    showToast('❌','Failed to save memory');
+    console.error(err);
+  }
+}
+async function deleteMemory(id){
+  if(!confirm('Delete this memory? 💔'))return;
+  await db.collection('memories').doc(id).delete();
+  showToast('🗑️','Memory deleted');
+}
+function openViewer(id){
+  const m=memoriesData.find(x=>x.id===id);if(!m)return;
+  document.getElementById('viewerImg').src=m.url||m.dataUrl;
+  document.getElementById('viewerTitle').textContent=m.title;
+  document.getElementById('viewerMeta').textContent=m.uploadedBy+' · '+(m.desc||'')+' · '+formatDate(m.date);
+  document.getElementById('imageViewer').classList.add('open');
+}
+function closeViewer(){document.getElementById('imageViewer').classList.remove('open')}
+
+// ===== NOTES =====
+function listenNotes(){
+  if(!db)return;
+  if(notesUnsub)notesUnsub();
+  notesUnsub=db.collection('notes').orderBy('pinned','desc').onSnapshot(snap=>{
+    notesData=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderNotes();
+    updateProfileStats();
+  });
+}
+function filterNotes(){noteSearchQ=document.getElementById('notesSearch').value.toLowerCase();renderNotes()}
+function renderNotes(){
+  const list=document.getElementById('notesList');
+  let filtered=notesData;
+  if(noteSearchQ)filtered=filtered.filter(n=>n.title.toLowerCase().includes(noteSearchQ)||n.body.toLowerCase().includes(noteSearchQ));
+  if(!filtered.length){
+    list.innerHTML=`<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">No notes yet</div><div class="empty-sub">Tap + to write your first note 💕</div></div>`;
+    return;
+  }
+  list.innerHTML=filtered.map(n=>`
+    <div class="note-card ${n.pinned?'pinned':''}" onclick="openNote('${n.id}')">
+      <div class="note-title">${n.title||'Untitled'}</div>
+      <div class="note-preview">${n.body||''}</div>
+      <div class="note-meta">
+        <div class="note-by">${n.editedBy||n.createdBy||'?'} · ${formatDate(n.editedAt||n.createdAt)}</div>
+        <div class="note-actions">
+          <span class="note-pin" onclick="event.stopPropagation();pinNote('${n.id}',${!n.pinned})" title="Pin">${n.pinned?'📌':'📍'}</span>
+          <button class="note-del" onclick="event.stopPropagation();deleteNote('${n.id}')">🗑️</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+function openNewNote(){
+  editingNoteId=null;
+  document.getElementById('editorTitle').value='';
+  document.getElementById('editorBody').value='';
+  document.getElementById('editorMeta').textContent='New note';
+  document.getElementById('editorSaved').textContent='';
+  document.getElementById('noteEditor').classList.add('open');
+}
+function openNote(id){
+  const n=notesData.find(x=>x.id===id);if(!n)return;
+  editingNoteId=id;
+  document.getElementById('editorTitle').value=n.title||'';
+  document.getElementById('editorBody').value=n.body||'';
+  document.getElementById('editorMeta').textContent='Edited by '+(n.editedBy||'?')+' · '+formatDate(n.editedAt||n.createdAt);
+  document.getElementById('noteEditor').classList.add('open');
+}
+function closeNoteEditor(){document.getElementById('noteEditor').classList.remove('open')}
+async function saveNote(){
+  const title=document.getElementById('editorTitle').value.trim()||'Untitled';
+  const body=document.getElementById('editorBody').value;
+  const data={title,body,editedBy:currentUser,editedAt:firebase.firestore.FieldValue.serverTimestamp()};
+  try{
+    if(editingNoteId){
+      await db.collection('notes').doc(editingNoteId).update(data);
+    } else {
+      await db.collection('notes').add({...data,createdBy:currentUser,createdAt:firebase.firestore.FieldValue.serverTimestamp(),pinned:false});
+    }
+    document.getElementById('editorSaved').textContent='✅ Saved';
+    setTimeout(()=>document.getElementById('editorSaved').textContent='',2000);
+    if(!editingNoteId)showToast('📝',currentUser+' created a new note!');
+  }catch(e){showToast('❌','Failed to save')}
+}
+async function pinNote(id,pin){
+  await db.collection('notes').doc(id).update({pinned:pin});
+}
+async function deleteNote(id){
+  if(!confirm('Delete this note?'))return;
+  await db.collection('notes').doc(id).delete();
+  showToast('🗑️','Note deleted');
+}
+
+// ===== TTT =====
+function openTTT(){document.getElementById('tttGame').classList.add('open');renderTTT();listenTTT()}
+function closeTTT(){document.getElementById('tttGame').classList.remove('open');if(tttUnsub)tttUnsub()}
+function listenTTT(){
+  if(!db)return;
+  if(tttUnsub)tttUnsub();
+  tttUnsub=db.collection('games').doc('ttt').onSnapshot(snap=>{
+    if(snap.exists){
+      const d=snap.data();
+      tttBoard=d.board||Array(9).fill(null);
+      tttTurn=d.turn||'Subham';
+      tttScores=d.scores||{Subham:0,Arpita:0,draws:0};
+      renderTTT();
+    } else {
+      initTTTFirestore();
+    }
+  });
+}
+async function initTTTFirestore(){
+  await db.collection('games').doc('ttt').set({board:Array(9).fill(null),turn:'Subham',scores:{Subham:0,Arpita:0,draws:0}});
+}
+function renderTTT(){
+  const board=document.getElementById('tttBoard');
+  const marks={Subham:'❌',Arpita:'⭕'};
+  const winner=checkWinner(tttBoard);
+  const full=tttBoard.every(c=>c);
+  document.getElementById('tttS').textContent=tttScores.Subham||0;
+  document.getElementById('tttA').textContent=tttScores.Arpita||0;
+  document.getElementById('tttD').textContent=tttScores.draws||0;
+  let winCells=[];
+  if(winner)winCells=getWinLine(tttBoard);
+  board.innerHTML=tttBoard.map((cell,i)=>`
+    <div class="ttt-cell ${cell?'taken':''} ${winCells.includes(i)?'win-cell':''}" onclick="tttClick(${i})">
+      ${cell?marks[cell]:''}
+    </div>
+  `).join('');
+  const status=document.getElementById('tttStatus');
+  if(winner){status.textContent='🎉 '+winner+' wins this round!';}
+  else if(full){status.textContent='🤝 It\'s a draw!'}
+  else{status.textContent=(tttTurn==='Subham'?'❌':'⭕')+' '+tttTurn+'\'s turn'}
+}
+async function tttClick(i){
+  if(tttBoard[i])return;
+  const winner=checkWinner(tttBoard);if(winner)return;
+  if(tttTurn!==currentUser){showToast('⏳','It\'s '+tttTurn+'\'s turn!');return}
+  const newBoard=[...tttBoard];newBoard[i]=currentUser;
+  const newWinner=checkWinner(newBoard);
+  const newFull=newBoard.every(c=>c);
+  let newScores={...tttScores};
+  let newTurn=currentUser==='Subham'?'Arpita':'Subham';
+  if(newWinner){
+    newScores[newWinner]=(newScores[newWinner]||0)+1;
+    showToast('🏆',newWinner+' wins! 🎉');
+    confetti();
+    setTimeout(async()=>{
+      await db.collection('games').doc('ttt').update({board:Array(9).fill(null),turn:newTurn,scores:newScores});
+    },2500);
+  } else if(newFull){
+    newScores.draws=(newScores.draws||0)+1;
+    showToast('🤝','It\'s a draw!');
+    setTimeout(async()=>{
+      await db.collection('games').doc('ttt').update({board:Array(9).fill(null),turn:newTurn,scores:newScores});
+    },2000);
+  }
+  await db.collection('games').doc('ttt').update({board:newBoard,turn:newTurn,scores:newScores});
+}
+async function resetTTT(){await db.collection('games').doc('ttt').update({board:Array(9).fill(null),turn:'Subham'})}
+async function resetTTTScores(){
+  if(!confirm('Reset all scores?'))return;
+  await db.collection('games').doc('ttt').set({board:Array(9).fill(null),turn:'Subham',scores:{Subham:0,Arpita:0,draws:0}});
+}
+function checkWinner(b){
+  const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for(const [a,bx,c] of lines)if(b[a]&&b[a]===b[bx]&&b[a]===b[c])return b[a];
+  return null;
+}
+function getWinLine(b){
+  const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for(const line of lines){const [a,bx,c]=line;if(b[a]&&b[a]===b[bx]&&b[a]===b[c])return line;}
+  return [];
+}
+
+// ===== RPS =====
+function openRPS(){document.getElementById('rpsGame').classList.add('open');listenRPS();startRPS()}
+function closeRPS(){document.getElementById('rpsGame').classList.remove('open');clearInterval(rpsTimerInt);if(rpsUnsub)rpsUnsub()}
+function listenRPS(){
+  if(!db)return;
+  if(rpsUnsub)rpsUnsub();
+  rpsUnsub=db.collection('games').doc('rps').onSnapshot(snap=>{
+    if(snap.exists){
+      const d=snap.data();
+      rpsScores=d.scores||{Subham:0,Arpita:0};
+      document.getElementById('rpsS').textContent=rpsScores.Subham||0;
+      document.getElementById('rpsA').textContent=rpsScores.Arpita||0;
+      const myChoice=d[currentUser];
+      const partner=currentUser==='Subham'?'Arpita':'Subham';
+      const theirChoice=d[partner];
+      if(myChoice&&theirChoice&&d.phase==='reveal'){
+        showRPSResult(myChoice,theirChoice,d.result);
+      } else if(myChoice&&!theirChoice&&d.phase==='choosing'){
+        document.getElementById('rpsChoices').style.display='none';
+        document.getElementById('rpsWaiting').style.display='block';
+        document.getElementById('rpsWaitFor').textContent=partner;
+        document.getElementById('rpsResult').style.display='none';
+        clearInterval(rpsTimerInt);
+      }
+    }
+  });
+}
+function startRPS(){
+  rpsMyChoice=null;rpsTheirChoice=null;
+  document.getElementById('rpsCountdown').innerHTML='';
+  document.getElementById('rpsChoices').style.display='none';
+  document.getElementById('rpsResult').style.display='none';
+  document.getElementById('rpsWaiting').style.display='none';
+  if(db)db.collection('games').doc('rps').set({phase:'countdown',Subham:null,Arpita:null,scores:rpsScores,result:null},{merge:true});
+  let count=3;
+  document.getElementById('rpsCountdown').innerHTML=`<div class="rps-timer">${count}</div>`;
+  clearInterval(rpsTimerInt);
+  rpsTimerInt=setInterval(()=>{
+    count--;
+    if(count>0){
+      document.getElementById('rpsCountdown').innerHTML=`<div class="rps-timer">${count}</div>`;
+    } else if(count===0){
+      document.getElementById('rpsCountdown').innerHTML=`<div class="rps-timer" style="font-size:32px">GO! 🎯</div>`;
+    } else {
+      clearInterval(rpsTimerInt);
+      document.getElementById('rpsCountdown').innerHTML='';
+      document.getElementById('rpsChoices').style.display='block';
+      if(db)db.collection('games').doc('rps').update({phase:'choosing'});
+      startRPSTimer();
+    }
+  },1000);
+}
+let rpsChooseTimer;
+function startRPSTimer(){
+  let t=3;
+  document.getElementById('rpsPrompt').textContent='⏰ '+t+'s to choose!';
+  clearInterval(rpsChooseTimer);
+  rpsChooseTimer=setInterval(()=>{
+    t--;
+    if(t>=0)document.getElementById('rpsPrompt').textContent='⏰ '+t+'s to choose!';
+    if(t<=0){
+      clearInterval(rpsChooseTimer);
+      if(!rpsMyChoice)rpsChoose(['🪨','📄','✂️'][Math.floor(Math.random()*3)]);
+    }
+  },1000);
+}
+async function rpsChoose(choice){
+  if(rpsMyChoice)return;
+  rpsMyChoice=choice;
+  document.querySelectorAll('.rps-btn').forEach(b=>{b.disabled=true;if(b.textContent.includes(choice))b.classList.add('selected')});
+  document.getElementById('rpsPrompt').textContent='✅ You chose '+choice;
+  clearInterval(rpsChooseTimer);
+  if(!db)return;
+  const partner=currentUser==='Subham'?'Arpita':'Subham';
+  await db.collection('games').doc('rps').update({[currentUser]:choice});
+  const snap=await db.collection('games').doc('rps').get();
+  const data=snap.data();
+  const theirChoice=data[partner];
+  if(theirChoice){
+    const result=rpsWinner(choice,theirChoice,currentUser,partner);
+    let newScores={...rpsScores};
+    if(result.winner)newScores[result.winner]=(newScores[result.winner]||0)+1;
+    await db.collection('games').doc('rps').update({phase:'reveal',result:result.msg,scores:newScores});
+  }
+}
+function rpsWinner(myC,theirC,me,them){
+  const beats={'🪨':'✂️','📄':'🪨','✂️':'📄'};
+  if(myC===theirC)return{winner:null,msg:"It's a draw! 🤝"};
+  if(beats[myC]===theirC)return{winner:me,msg:me+' wins! 🎉'};
+  return{winner:them,msg:them+' wins! 🎉'};
+}
+function showRPSResult(myC,theirC,resultMsg){
+  document.getElementById('rpsChoices').style.display='none';
+  document.getElementById('rpsWaiting').style.display='none';
+  const partner=currentUser==='Subham'?'Arpita':'Subham';
+  document.getElementById('rpsVsDisplay').innerHTML=`<div><div>${myC}</div><div style="font-size:13px;color:var(--muted)">${currentUser}</div></div><div style="font-size:18px;font-weight:700;color:var(--muted)">VS</div><div><div>${theirC}</div><div style="font-size:13px;color:var(--muted)">${partner}</div></div>`;
+  document.getElementById('rpsResultText').textContent=resultMsg;
+  document.getElementById('rpsResult').style.display='block';
+  if(resultMsg&&resultMsg.includes(currentUser)&&resultMsg.includes('wins'))confetti();
+}
+async function resetRPSScores(){
+  if(!confirm('Reset scores?'))return;
+  await db.collection('games').doc('rps').set({scores:{Subham:0,Arpita:0},phase:'idle'},{ merge:true});
+  rpsScores={Subham:0,Arpita:0};
+  document.getElementById('rpsS').textContent=0;
+  document.getElementById('rpsA').textContent=0;
+}
+
+// ===== DRAW & GUESS =====
+let drawPhase='idle',drawRole='drawer',drawWord='',drawRound=0;
+function openDraw(){
+  document.getElementById('drawGame').classList.add('open');
+  initCanvas();
+  listenDraw();
+}
+function closeDraw(){
+  document.getElementById('drawGame').classList.remove('open');
+  if(drawUnsub)drawUnsub();
+}
+function initCanvas(){
+  const canvas=document.getElementById('drawCanvas');
+  const wrap=canvas.parentElement;
+  canvas.width=wrap.offsetWidth;
+  canvas.height=wrap.offsetHeight;
+  drawCtx=canvas.getContext('2d');
+  drawCtx.fillStyle='#fff';
+  drawCtx.fillRect(0,0,canvas.width,canvas.height);
+  drawCtx.strokeStyle=drawColor;
+  drawCtx.lineWidth=brushSize;
+  drawCtx.lineCap='round';
+  drawCtx.lineJoin='round';
+  canvas.addEventListener('pointerdown',startDraw);
+  canvas.addEventListener('pointermove',drawMove);
+  canvas.addEventListener('pointerup',endDraw);
+  canvas.addEventListener('pointerleave',endDraw);
+}
+function startDraw(e){
+  isDrawing=true;
+  const r=e.target.getBoundingClientRect();
+  drawCtx.beginPath();
+  drawCtx.moveTo(e.clientX-r.left,e.clientY-r.top);
+}
+function drawMove(e){
+  if(!isDrawing)return;
+  if(drawRole!=='drawer')return;
+  const r=e.target.getBoundingClientRect();
+  drawCtx.lineTo(e.clientX-r.left,e.clientY-r.top);
+  drawCtx.stroke();
+  if(db&&drawPhase==='drawing'){
+    const canvas=document.getElementById('drawCanvas');
+    db.collection('games').doc('draw').update({canvasData:canvas.toDataURL('image/jpeg',0.4)}).catch(()=>{});
+  }
+}
+function endDraw(){
+  if(!isDrawing)return;
+  isDrawing=false;
+  drawHistory.push(document.getElementById('drawCanvas').toDataURL());
+}
+function undoDrawing(){
+  if(drawHistory.length<=1)return;
+  drawHistory.pop();
+  const img=new Image();
+  img.onload=()=>{drawCtx.drawImage(img,0,0)};
+  img.src=drawHistory[drawHistory.length-1];
+}
+function clearCanvas(){
+  const c=document.getElementById('drawCanvas');
+  drawCtx.fillStyle='#fff';
+  drawCtx.fillRect(0,0,c.width,c.height);
+  drawHistory=[];
+  if(db)db.collection('games').doc('draw').update({canvasData:''}).catch(()=>{});
+}
+function setColor(el){
+  document.querySelectorAll('.color-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  drawColor=el.dataset.color;
+  drawCtx.strokeStyle=drawColor;
+}
+function setBrush(el){
+  document.querySelectorAll('.brush-sz').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  brushSize=parseInt(el.dataset.size);
+  drawCtx.lineWidth=brushSize;
+}
+function listenDraw(){
+  if(!db)return;
+  if(drawUnsub)drawUnsub();
+  drawUnsub=db.collection('games').doc('draw').onSnapshot(snap=>{
+    if(!snap.exists){initDrawFirestore();return}
+    const d=snap.data();
+    drawScores=d.scores||{Subham:0,Arpita:0};
+    document.getElementById('drawS').textContent=drawScores.Subham||0;
+    document.getElementById('drawA').textContent=drawScores.Arpita||0;
+    drawPhase=d.phase||'idle';
+    drawRole=d.drawer===currentUser?'drawer':'guesser';
+    drawWord=d.word||'';
+    const partner=currentUser==='Subham'?'Arpita':'Subham';
+    document.getElementById('drawStatus').textContent=drawPhase==='idle'?'Start a new round!':(drawPhase==='drawing'?(d.drawer===currentUser?'You are drawing':''+d.drawer+' is drawing...'):'Waiting...');
+    document.getElementById('drawStartSection').style.display=(drawPhase==='idle'||drawPhase==='done')?'block':'none';
+    document.getElementById('drawerSection').style.display=(drawPhase==='drawing'&&drawRole==='drawer')?'block':'none';
+    document.getElementById('guesserSection').style.display=(drawPhase==='drawing'&&drawRole==='guesser')?'block':'none';
+    document.getElementById('drawWaitSection').style.display='none';
+    if(drawPhase==='drawing'&&drawRole==='drawer'){
+      document.getElementById('drawWordDisplay').textContent='Your word: '+drawWord;
+      const guess=d.currentGuess;
+      if(guess){
+        document.getElementById('confirmSection').style.display='block';
+        document.getElementById('partnerGuess').textContent=guess;
+      } else {
+        document.getElementById('confirmSection').style.display='none';
+      }
+    }
+    if(drawPhase==='drawing'&&drawRole==='guesser'&&d.canvasData){
+      const img=new Image();
+      img.onload=()=>{drawCtx.clearRect(0,0,drawCtx.canvas.width,drawCtx.canvas.height);drawCtx.drawImage(img,0,0,drawCtx.canvas.width,drawCtx.canvas.height)};
+      img.src=d.canvasData;
+    }
+  });
+}
+async function initDrawFirestore(){
+  await db.collection('games').doc('draw').set({phase:'idle',drawer:'Subham',guesser:'Arpita',word:'',canvasData:'',scores:{Subham:0,Arpita:0},currentGuess:null});
+}
+const drawWords=['cat','house','sun','tree','car','flower','moon','dog','fish','love','heart','star','cake','bird','book','phone','music','beach','mountain','rain'];
+async function startDrawRound(){
+  const word=drawWords[Math.floor(Math.random()*drawWords.length)];
+  const partner=currentUser==='Subham'?'Arpita':'Subham';
+  clearCanvas();
+  await db.collection('games').doc('draw').update({phase:'drawing',drawer:currentUser,guesser:partner,word,canvasData:'',currentGuess:null});
+  showToast('🎨','New round! You draw: '+word);
+}
+async function submitGuess(){
+  const g=document.getElementById('guessInput').value.trim();
+  if(!g)return;
+  await db.collection('games').doc('draw').update({currentGuess:g});
+  document.getElementById('guessInput').value='';
+  showToast('💬','Guess sent!');
+}
+async function confirmGuess(correct){
+  const d=await db.collection('games').doc('draw').get();
+  const data=d.data();
+  if(correct){
+    const newScores={...drawScores};
+    newScores[data.guesser]=(newScores[data.guesser]||0)+1;
+    await db.collection('games').doc('draw').update({phase:'done',scores:newScores,currentGuess:null});
+    showToast('🎉',data.guesser+' guessed correctly!');
+    confetti();
+  } else {
+    await db.collection('games').doc('draw').update({currentGuess:null});
+    showToast('❌','Wrong guess! Keep drawing!');
+  }
+}
+async function resetDrawScores(){
+  if(!confirm('Reset scores?'))return;
+  await db.collection('games').doc('draw').update({scores:{Subham:0,Arpita:0}});
+}
+
+// ===== PROFILE =====
+function refreshProfile(){
+  const av=USERS[currentUser];
+  document.getElementById('profileAvatar').textContent=av.letter;
+  updateProfileStats();
+}
+function updateProfileStats(){
+  const photos=memoriesData.filter(m=>m.uploadedBy===currentUser).length;
+  const notes=notesData.filter(n=>n.createdBy===currentUser).length;
+  document.getElementById('statPhotos').textContent=photos;
+  document.getElementById('statNotes').textContent=notes;
+  const wins=(tttScores[currentUser]||0)+(rpsScores[currentUser]||0)+(drawScores[currentUser]||0);
+  document.getElementById('statWins').textContent=wins;
+}
+function doLogout(){
+  if(!confirm('Logout? 💔'))return;
+  setPresence(false);
+  currentUser=null;selectedUser=null;
+  document.getElementById('homePage').classList.remove('active');
+  document.getElementById('loginPage').classList.add('active');
+  document.getElementById('pwInput').value='';
+  document.getElementById('pwSection').style.display='none';
+  document.querySelectorAll('.user-btn').forEach(b=>b.classList.remove('selected-user'));
+  if(memoriesUnsub)memoriesUnsub();
+  if(notesUnsub)notesUnsub();
+}
+
+// ===== GAME SCORES LOAD =====
+async function loadGameScores(){
+  if(!db)return;
+  try{
+    const ttt=await db.collection('games').doc('ttt').get();
+    if(ttt.exists)tttScores=ttt.data().scores||{Subham:0,Arpita:0,draws:0};
+    const rps=await db.collection('games').doc('rps').get();
+    if(rps.exists)rpsScores=rps.data().scores||{Subham:0,Arpita:0};
+    const draw=await db.collection('games').doc('draw').get();
+    if(draw.exists)drawScores=draw.data().scores||{Subham:0,Arpita:0};
+    refreshGameBadges();
+  }catch(e){}
+}
+function refreshGameBadges(){
+  document.getElementById('tttBadge').textContent=(tttScores.Subham||0)+'-'+(tttScores.Arpita||0);
+  document.getElementById('rpsBadge').textContent=(rpsScores.Subham||0)+'-'+(rpsScores.Arpita||0);
+  document.getElementById('drawBadge').textContent=(drawScores.Subham||0)+'-'+(drawScores.Arpita||0);
+}
+
+// ===== UTILS =====
+function formatDate(ts){
+  if(!ts)return '—';
+  const d=ts.toDate?ts.toDate():new Date(ts);
+  return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+}
+function openModal(id){document.getElementById(id).classList.add('show')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function showProgress(){const p=document.getElementById('progressBar');p.style.display='block';p.style.width='60%'}
+function hideProgress(){const p=document.getElementById('progressBar');p.style.width='100%';setTimeout(()=>{p.style.display='none';p.style.width='0'},400)}
+function confetti(){
+  const colors=['#e879a0','#9333ea','#f9a8d4','#c084fc','#fda4af','#fb7185','#fbbf24'];
+  for(let i=0;i<30;i++){
+    const c=document.createElement('div');
+    c.className='confetti-piece';
+    c.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*20}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-delay:${Math.random()*0.8}s;animation-duration:${2+Math.random()}s;transform:rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3000);
+  }
+}
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show')});
+});
+document.getElementById('gateInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkGate()});
+document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+// ===== BOOT =====
+initFirebase().catch(e=>{
+  console.error('Firebase init failed:',e);
+  showToast('⚠️','Connection issue - some features may be limited');
+});
+
+// Expose to global scope for inline onclick handlers
+window.checkGate=checkGate;window.toggleGatePw=toggleGatePw;
+window.selectUser=selectUser;window.doLogin=doLogin;window.togglePw=togglePw;
+window.navigateTo=navigateTo;window.switchTab=switchTab;
+window.openAddMemoryModal=openAddMemoryModal;window.filterFolder=filterFolder;
+window.previewPhoto=previewPhoto;window.saveMemory=saveMemory;window.deleteMemory=deleteMemory;
+window.openViewer=openViewer;window.closeViewer=closeViewer;
+window.openNewNote=openNewNote;window.filterNotes=filterNotes;
+window.saveNote=saveNote;window.deleteNote=deleteNote;window.closeNoteEditor=closeNoteEditor;
+window.openTTT=openTTT;window.closeTTT=closeTTT;window.tttClick=tttClick;
+window.resetTTT=resetTTT;window.resetTTTScores=resetTTTScores;
+window.openRPS=openRPS;window.closeRPS=closeRPS;window.rpsChoose=rpsChoose;
+window.openDraw=openDraw;window.closeDraw=closeDraw;window.clearCanvas=clearCanvas;
+window.startDrawRound=startDrawRound;window.submitGuess=submitGuess;
+window.confirmGuess=confirmGuess;window.resetDrawScores=resetDrawScores;
+window.doLogout=doLogout;window.openModal=openModal;window.closeModal=closeModal;
+window.setColor=setColor;window.setBrush=setBrush;
+})();
+</script>
+</body>
+</html>
