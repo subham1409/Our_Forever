@@ -250,6 +250,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mcq-option-btn:active{transform:scale(.98)}
 .mcq-option-btn:hover{border-color:var(--pink);background:rgba(232,121,160,.05)}
 
+/* ENGLISH QUIZ */
+#engGame{position:fixed;inset:0;z-index:300;background:var(--bg);display:none;flex-direction:column}
+#engGame.open{display:flex}
+.eng-option-btn{width:100%;text-align:left;padding:14px 16px;border-radius:14px;border:1.5px solid rgba(232,121,160,.25);background:#fff;font-size:14px;font-weight:500;cursor:pointer;transition:.2s}
+.eng-option-btn:active:not(:disabled){transform:scale(.98)}
+.eng-option-btn:hover:not(:disabled){border-color:var(--pink);background:rgba(232,121,160,.05)}
+.eng-option-btn:disabled{cursor:default;opacity:.55}
+.eng-option-btn.eng-correct{border-color:#22c55e;background:rgba(34,197,94,.12);opacity:1}
+.eng-option-btn.eng-wrong{border-color:#ef4444;background:rgba(239,68,68,.1);opacity:1}
+.eng-option-btn.eng-mine{box-shadow:0 0 0 2px var(--purple) inset}
+
 /* PROFILE */
 .profile-hero{background:linear-gradient(135deg,var(--pink),var(--purple));padding:52px 20px 40px;text-align:center;color:#fff;position:relative}
 .profile-avatar{width:84px;height:84px;border-radius:50%;border:4px solid rgba(255,255,255,.5);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:36px;background:rgba(255,255,255,.2)}
@@ -477,6 +488,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="game-icon">❓</div>
       <div class="game-title">Quiz Time</div>
       <div class="game-score-badge" id="mcqBadge">0-0</div>
+    </div>
+    <div class="game-card" onclick="openEnglish()">
+      <div class="game-icon">📚</div>
+      <div class="game-title">English Quiz</div>
+      <div class="game-score-badge" id="engBadge">0-0</div>
     </div>
   </div>
 </div>
@@ -842,6 +858,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<!-- ENGLISH QUIZ GAME -->
+<div id="engGame">
+  <div class="game-header">
+    <button class="game-back" onclick="closeEnglish()">← Back</button>
+    <div class="game-h-title">📚 English Quiz</div>
+    <button onclick="resetEnglishScores()" style="background:rgba(255,255,255,.2);border:none;border-radius:12px;padding:8px 12px;color:#fff;font-size:12px;cursor:pointer">Reset</button>
+  </div>
+  <div style="display:flex;justify-content:space-around;padding:10px 16px">
+    <div class="score-box" style="flex:1;margin:0 4px"><div class="score-name">Subham</div><div class="score-num" id="engS">0</div></div>
+    <div class="score-box" style="flex:1;margin:0 4px"><div class="score-name">Arpita</div><div class="score-num" id="engA">0</div></div>
+  </div>
+  <div style="flex:1;padding:6px 16px;overflow-y:auto">
+    <div id="engCountdown" style="text-align:center;padding:20px 0"></div>
+    <div id="engQuestionSection" style="display:none">
+      <div style="text-align:center;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px" id="engTimerText">⏰ 10s to answer!</div>
+      <div style="text-align:center;padding:6px 4px 16px;font-size:17px;font-weight:700;color:var(--text)" id="engQuestionText"></div>
+      <div id="engOptionsList" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+    <div id="engWaitSection" style="display:none;text-align:center;padding:30px 10px">
+      <div style="font-size:32px">⏳</div>
+      <div style="font-size:15px;font-weight:600;color:var(--muted);margin-top:8px">Waiting for <span id="engWaitFor"></span>...</div>
+    </div>
+    <div id="engResultSection" style="display:none;text-align:center;padding:20px 10px">
+      <div id="engResultIcon" style="font-size:50px"></div>
+      <div id="engResultText" style="font-size:15px;font-weight:700;margin-top:10px;color:var(--text);line-height:1.5"></div>
+      <button class="btn-primary" style="width:100%;margin-top:18px" onclick="startEnglish()">📚 Next Question</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
 // ===== FIREBASE CONFIG =====
@@ -874,10 +920,11 @@ let puzzleOrder=null, puzzleSelected=null, puzzleImage='';
 const PUZZLE_SIZE=3;
 let emojiScores={Subham:0,Arpita:0}, emojiPhase='idle', emojiRole='guesser', emojiNextHost='Subham';
 let mcqScores={Subham:0,Arpita:0}, mcqCorrectIdx=0;
+let engScores={Subham:0,Arpita:0}, engMyAnswer=null, engTimerInt=null, engChooseTimer=null;
 let editingNoteId=null;
 // Realtime DB listeners (off functions)
 let memOff=null, notesOff=null, tttOff=null, rpsOff=null, drawOff=null, presenceOff=null;
-let puzzleOff=null, emojiOff=null, mcqOff=null;
+let puzzleOff=null, emojiOff=null, mcqOff=null, engOff=null;
 
 // ===== FIREBASE INIT =====
 async function initFirebase(){
@@ -1912,6 +1959,189 @@ async function resetMcqScores(){
   await rtdb.ref('games/mcq').update({scores:{Subham:0,Arpita:0}});
 }
 
+// ===== ENGLISH QUIZ =====
+const ENG_QUESTIONS=[
+  {q:"What is the synonym of 'Happy'?",o:["Joyful","Angry","Tired","Sad"],c:0},
+  {q:"What is the opposite of 'Brave'?",o:["Strong","Cowardly","Bold","Fearless"],c:1},
+  {q:"Choose the correct sentence:",o:["She don't like tea","She doesn't likes tea","She doesn't like tea","She not like tea"],c:2},
+  {q:"What is the plural of 'Child'?",o:["Childs","Children","Childes","Childer"],c:1},
+  {q:"What is the synonym of 'Beautiful'?",o:["Ugly","Pretty","Dull","Plain"],c:1},
+  {q:"What is the past tense of 'Go'?",o:["Goed","Gone","Went","Going"],c:2},
+  {q:"Which word is a noun?",o:["Quickly","Run","Happiness","Beautiful"],c:2},
+  {q:"What is the opposite of 'Difficult'?",o:["Hard","Easy","Tough","Complex"],c:1},
+  {q:"Choose the correctly spelled word:",o:["Recieve","Receive","Receeve","Receve"],c:1},
+  {q:"What is the synonym of 'Big'?",o:["Tiny","Small","Large","Little"],c:2},
+  {q:"Fill in the blank: She ___ to school every day.",o:["go","goes","going","gone"],c:1},
+  {q:"What is the opposite of 'Begin'?",o:["Start","End","Open","Continue"],c:1},
+  {q:"Which is the correct article: '___ apple'?",o:["A","An","The only","No article"],c:1},
+  {q:"What is the synonym of 'Quick'?",o:["Slow","Fast","Lazy","Late"],c:1},
+  {q:"What is the plural of 'Mouse' (animal)?",o:["Mouses","Mices","Mice","Mouse"],c:2},
+  {q:"Choose the correct sentence:",o:["He are my friend","He am my friend","He is my friend","He be my friend"],c:2},
+  {q:"What is the opposite of 'Open'?",o:["Close","Wide","Big","Free"],c:0},
+  {q:"What is the synonym of 'Smart'?",o:["Dull","Clever","Slow","Weak"],c:1},
+  {q:"Which word means 'a person who teaches'?",o:["Student","Teacher","Doctor","Driver"],c:1},
+  {q:"What is the past tense of 'Eat'?",o:["Eated","Ate","Eaten","Eating"],c:1},
+  {q:"What is the opposite of 'Hot'?",o:["Warm","Cold","Mild","Cool breeze"],c:1},
+  {q:"Choose the correct word: I have ___ idea.",o:["a","an","the","no article"],c:1},
+  {q:"What is the synonym of 'Sad'?",o:["Happy","Excited","Unhappy","Cheerful"],c:2},
+  {q:"What is the plural of 'Leaf'?",o:["Leafs","Leaves","Leafes","Leaf"],c:1},
+  {q:"What is the opposite of 'Always'?",o:["Often","Never","Usually","Sometimes"],c:1},
+];
+function openEnglish(){document.getElementById('engGame').classList.add('open');listenEnglish()}
+function closeEnglish(){
+  document.getElementById('engGame').classList.remove('open');
+  clearInterval(engTimerInt); clearInterval(engChooseTimer);
+  if(engOff){ engOff(); engOff=null; }
+}
+function listenEnglish(){
+  if(!rtdb)return;
+  if(engOff){ engOff(); engOff=null; }
+  const ref=rtdb.ref('games/eng');
+  const handler=ref.on('value', snap=>{
+    if(!snap.exists()){ startEnglish(); return; }
+    const d=snap.val();
+    engScores=d.scores||{Subham:0,Arpita:0};
+    document.getElementById('engS').textContent=engScores.Subham||0;
+    document.getElementById('engA').textContent=engScores.Arpita||0;
+    const partner=currentUser==='Subham'?'Arpita':'Subham';
+    const myAns=d[currentUser];
+    const theirAns=d[partner];
+
+    if(d.phase==='countdown' && d.startedAt){
+      clearInterval(engTimerInt); clearInterval(engChooseTimer);
+      document.getElementById('engQuestionSection').style.display='none';
+      document.getElementById('engWaitSection').style.display='none';
+      document.getElementById('engResultSection').style.display='none';
+      engMyAnswer=null;
+      const COUNTDOWN=3;
+      function tickCountdown(){
+        const elapsed=Math.floor((Date.now()-d.startedAt)/1000);
+        const remaining=COUNTDOWN-elapsed;
+        if(remaining>0){
+          document.getElementById('engCountdown').innerHTML='<div class="rps-timer">'+remaining+'</div>';
+        } else if(remaining===0){
+          document.getElementById('engCountdown').innerHTML='<div class="rps-timer" style="font-size:32px">GO! \u{1f3af}</div>';
+        } else {
+          clearInterval(engTimerInt);
+          document.getElementById('engCountdown').innerHTML='';
+          renderEnglishQuestion(d);
+          document.getElementById('engQuestionSection').style.display='block';
+          if(rtdb) rtdb.ref('games/eng').update({phase:'answering',answerStartedAt:firebase.database.ServerValue.TIMESTAMP});
+          startEnglishTimer();
+        }
+      }
+      tickCountdown();
+      clearInterval(engTimerInt);
+      engTimerInt=setInterval(tickCountdown,500);
+      return;
+    }
+
+    if(d.phase==='answering'){
+      document.getElementById('engCountdown').innerHTML='';
+      if(!myAns){
+        renderEnglishQuestion(d);
+        document.getElementById('engQuestionSection').style.display='block';
+        document.getElementById('engWaitSection').style.display='none';
+        document.getElementById('engResultSection').style.display='none';
+      } else if(myAns && !theirAns){
+        document.getElementById('engQuestionSection').style.display='none';
+        document.getElementById('engWaitSection').style.display='block';
+        document.getElementById('engWaitFor').textContent=partner;
+        document.getElementById('engResultSection').style.display='none';
+        clearInterval(engChooseTimer);
+      }
+    }
+
+    if(d.phase==='result'){
+      clearInterval(engTimerInt); clearInterval(engChooseTimer);
+      document.getElementById('engCountdown').innerHTML='';
+      showEnglishResult(d);
+    }
+  });
+  engOff=()=>ref.off('value', handler);
+}
+function renderEnglishQuestion(d){
+  document.getElementById('engQuestionText').textContent=d.question;
+  const list=document.getElementById('engOptionsList');
+  list.innerHTML='';
+  (d.options||[]).forEach((opt,i)=>{
+    const b=document.createElement('button');
+    b.className='eng-option-btn'; b.textContent=opt; b.type='button';
+    b.onclick=()=>engChoose(i);
+    list.appendChild(b);
+  });
+}
+async function startEnglish(){
+  if(!rtdb)return;
+  engMyAnswer=null;
+  document.getElementById('engCountdown').innerHTML='';
+  document.getElementById('engQuestionSection').style.display='none';
+  document.getElementById('engWaitSection').style.display='none';
+  document.getElementById('engResultSection').style.display='none';
+  const pick=ENG_QUESTIONS[Math.floor(Math.random()*ENG_QUESTIONS.length)];
+  await rtdb.ref('games/eng').update({
+    phase:'countdown', question:pick.q, options:pick.o, correctIndex:pick.c,
+    Subham:null, Arpita:null, scores:engScores, startedAt:firebase.database.ServerValue.TIMESTAMP
+  });
+}
+function startEnglishTimer(){
+  let t=10;
+  document.getElementById('engTimerText').textContent='\u23f0 '+t+'s to answer!';
+  clearInterval(engChooseTimer);
+  engChooseTimer=setInterval(()=>{
+    t--;
+    if(t>=0) document.getElementById('engTimerText').textContent='\u23f0 '+t+'s to answer!';
+    if(t<=0){ clearInterval(engChooseTimer); if(engMyAnswer===null) engChoose(-1); }
+  },1000);
+}
+async function engChoose(i){
+  if(engMyAnswer!==null)return;
+  engMyAnswer=i;
+  document.querySelectorAll('.eng-option-btn').forEach((b,idx)=>{
+    b.disabled=true;
+    if(idx===i) b.classList.add('eng-mine');
+  });
+  document.getElementById('engTimerText').textContent=i>=0?'\u2705 Answer submitted!':'\u23f0 Time\'s up!';
+  clearInterval(engChooseTimer);
+  if(!rtdb)return;
+  const partner=currentUser==='Subham'?'Arpita':'Subham';
+  await rtdb.ref('games/eng').update({[currentUser]:i});
+  const snap=await rtdb.ref('games/eng').get();
+  const data=snap.val();
+  const theirAns=data[partner];
+  if(theirAns!==null && theirAns!==undefined){
+    const correctIndex=data.correctIndex;
+    let newScores={...engScores};
+    if(data[currentUser]===correctIndex) newScores[currentUser]=(newScores[currentUser]||0)+1;
+    if(theirAns===correctIndex) newScores[partner]=(newScores[partner]||0)+1;
+    await rtdb.ref('games/eng').update({phase:'result',scores:newScores});
+  }
+}
+function showEnglishResult(d){
+  document.getElementById('engQuestionSection').style.display='none';
+  document.getElementById('engWaitSection').style.display='none';
+  const partner=currentUser==='Subham'?'Arpita':'Subham';
+  const myAns=d[currentUser], theirAns=d[partner], correctIndex=d.correctIndex;
+  const myCorrect=myAns===correctIndex, theirCorrect=theirAns===correctIndex;
+  let msg='';
+  if(myCorrect && theirCorrect) msg='Both of you got it right! \u{1f389} +1 each';
+  else if(myCorrect) msg='You got it right! \u{1f389} +1 point';
+  else if(theirCorrect) msg=partner+' got it right! +1 point';
+  else msg='Nobody got it right \u{1f605}';
+  msg+='\nCorrect answer: '+(d.options||[])[correctIndex];
+  document.getElementById('engResultIcon').textContent=myCorrect?'\u{1f389}':(theirCorrect?'\u{1f4da}':'\u{1f605}');
+  document.getElementById('engResultText').innerHTML=msg.replace('\n','<br/>');
+  document.getElementById('engResultSection').style.display='block';
+  if(myCorrect) confetti();
+}
+async function resetEnglishScores(){
+  if(!confirm('Reset scores?'))return;
+  await rtdb.ref('games/eng').update({scores:{Subham:0,Arpita:0},phase:'idle',Subham:null,Arpita:null});
+  engScores={Subham:0,Arpita:0};
+  document.getElementById('engS').textContent=0;
+  document.getElementById('engA').textContent=0;
+}
+
 // ===== PROFILE =====
 function refreshProfile(){
   const av=USERS[currentUser];
@@ -1923,7 +2153,7 @@ function updateProfileStats(){
   const notes=notesData.filter(n=>n.createdBy===currentUser).length;
   document.getElementById('statPhotos').textContent=photos;
   document.getElementById('statNotes').textContent=notes;
-  const wins=(tttScores[currentUser]||0)+(rpsScores[currentUser]||0)+(drawScores[currentUser]||0)+(emojiScores[currentUser]||0)+(mcqScores[currentUser]||0);
+  const wins=(tttScores[currentUser]||0)+(rpsScores[currentUser]||0)+(drawScores[currentUser]||0)+(emojiScores[currentUser]||0)+(mcqScores[currentUser]||0)+(engScores[currentUser]||0);
   document.getElementById('statWins').textContent=wins;
 }
 function doLogout(){
@@ -1940,6 +2170,7 @@ function doLogout(){
   if(puzzleOff){ puzzleOff(); puzzleOff=null; }
   if(emojiOff){ emojiOff(); emojiOff=null; }
   if(mcqOff){ mcqOff(); mcqOff=null; }
+  if(engOff){ engOff(); engOff=null; }
   document.getElementById('homePage').classList.remove('active');
   document.getElementById('loginPage').classList.add('active');
   document.getElementById('pwInput').value='';
@@ -1961,6 +2192,8 @@ async function loadGameScores(){
     if(emoji.exists()) emojiScores=emoji.val().scores||{Subham:0,Arpita:0};
     const mcq=await rtdb.ref('games/mcq').get();
     if(mcq.exists()) mcqScores=mcq.val().scores||{Subham:0,Arpita:0};
+    const eng=await rtdb.ref('games/eng').get();
+    if(eng.exists()) engScores=eng.val().scores||{Subham:0,Arpita:0};
     refreshGameBadges();
   }catch(e){ console.error('loadGameScores:',e); }
 }
@@ -1970,6 +2203,7 @@ function refreshGameBadges(){
   document.getElementById('drawBadge').textContent=(drawScores.Subham||0)+'-'+(drawScores.Arpita||0);
   document.getElementById('emojiBadge').textContent=(emojiScores.Subham||0)+'-'+(emojiScores.Arpita||0);
   document.getElementById('mcqBadge').textContent=(mcqScores.Subham||0)+'-'+(mcqScores.Arpita||0);
+  document.getElementById('engBadge').textContent=(engScores.Subham||0)+'-'+(engScores.Arpita||0);
 }
 
 // ===== UTILS =====
@@ -2028,6 +2262,8 @@ window.openEmoji=openEmoji;window.closeEmoji=closeEmoji;window.startEmojiRound=s
 window.submitEmojiGuess=submitEmojiGuess;window.confirmEmojiGuess=confirmEmojiGuess;window.resetEmojiScores=resetEmojiScores;
 window.openMcq=openMcq;window.closeMcq=closeMcq;window.openMcqCreate=openMcqCreate;
 window.setMcqCorrect=setMcqCorrect;window.saveMcqQuestion=saveMcqQuestion;window.answerMcq=answerMcq;window.resetMcqScores=resetMcqScores;
+window.openEnglish=openEnglish;window.closeEnglish=closeEnglish;window.startEnglish=startEnglish;
+window.engChoose=engChoose;window.resetEnglishScores=resetEnglishScores;
 })();
 </script>
 </body>
