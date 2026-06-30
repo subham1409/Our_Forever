@@ -227,6 +227,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .confirm-yes{flex:1;padding:12px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;border-radius:14px;font-weight:600;cursor:pointer;font-size:15px}
 .confirm-no{flex:1;padding:12px;background:#fee2e2;color:#dc2626;border:none;border-radius:14px;font-weight:600;cursor:pointer;font-size:15px}
 
+/* PUZZLE */
+#puzzleGame{position:fixed;inset:0;z-index:300;background:var(--bg);display:none;flex-direction:column}
+#puzzleGame.open{display:flex}
+.puzzle-wrap{flex:1;padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.puzzle-grid{display:grid;width:min(320px,86vw);aspect-ratio:1;border-radius:18px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.14);gap:2px;background:#1e1b4b}
+.puzzle-tile{background-repeat:no-repeat;cursor:pointer;transition:.15s}
+.puzzle-tile.selected{outline:4px solid var(--pink);outline-offset:-4px;filter:brightness(1.08)}
+.puzzle-empty-state{text-align:center;padding:30px 20px;color:var(--muted)}
+
+/* EMOJI GUESS */
+#emojiGame{position:fixed;inset:0;z-index:300;background:var(--bg);display:none;flex-direction:column}
+#emojiGame.open{display:flex}
+.emoji-display{font-size:56px;text-align:center;padding:26px 10px;background:#fff;border-radius:22px;margin:14px 16px;box-shadow:0 4px 20px rgba(0,0,0,.06);min-height:104px;display:flex;align-items:center;justify-content:center;letter-spacing:4px}
+
+/* MCQ QUIZ */
+#mcqGame{position:fixed;inset:0;z-index:300;background:var(--bg);display:none;flex-direction:column}
+#mcqGame.open{display:flex}
+.mcq-correct-btn{width:38px;height:38px;border-radius:12px;border:2px solid rgba(232,121,160,.25);background:#fff;font-size:16px;cursor:pointer;flex-shrink:0;opacity:.4;transition:.2s}
+.mcq-correct-btn.active{opacity:1;background:linear-gradient(135deg,var(--pink),var(--purple));border-color:transparent}
+.mcq-option-btn{width:100%;text-align:left;padding:14px 16px;border-radius:14px;border:1.5px solid rgba(232,121,160,.25);background:#fff;font-size:14px;font-weight:500;cursor:pointer;transition:.2s}
+.mcq-option-btn:active{transform:scale(.98)}
+.mcq-option-btn:hover{border-color:var(--pink);background:rgba(232,121,160,.05)}
+
 /* PROFILE */
 .profile-hero{background:linear-gradient(135deg,var(--pink),var(--purple));padding:52px 20px 40px;text-align:center;color:#fff;position:relative}
 .profile-avatar{width:84px;height:84px;border-radius:50%;border:4px solid rgba(255,255,255,.5);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:36px;background:rgba(255,255,255,.2)}
@@ -441,6 +464,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="game-title">Rock Paper Scissors</div>
       <div class="game-score-badge" id="rpsBadge">0-0</div>
     </div>
+    <div class="game-card" onclick="openPuzzle()">
+      <div class="game-icon">🧩</div>
+      <div class="game-title">Photo Puzzle</div>
+    </div>
+    <div class="game-card" onclick="openEmoji()">
+      <div class="game-icon">😄</div>
+      <div class="game-title">Emoji Guess</div>
+      <div class="game-score-badge" id="emojiBadge">0-0</div>
+    </div>
+    <div class="game-card" onclick="openMcq()">
+      <div class="game-icon">❓</div>
+      <div class="game-title">Quiz Time</div>
+      <div class="game-score-badge" id="mcqBadge">0-0</div>
+    </div>
   </div>
 </div>
 
@@ -546,6 +583,43 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="modal-btns">
       <button class="btn-secondary" onclick="closeModal('memoryModal')">Cancel</button>
       <button class="btn-primary" onclick="saveMemory()">💾 Save Memory</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MCQ MODAL -->
+<div class="modal-overlay" id="mcqModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">❓ Add a Question</div>
+    <div class="form-group">
+      <label class="form-label">Question</label>
+      <textarea class="form-textarea" id="mcqQInput" placeholder="Type your question..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Options (tap ⭐ to mark the correct one)</label>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <button type="button" class="mcq-correct-btn active" data-i="0" onclick="setMcqCorrect(0)">⭐</button>
+          <input class="form-input" id="mcqOpt0" placeholder="Option 1"/>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button type="button" class="mcq-correct-btn" data-i="1" onclick="setMcqCorrect(1)">⭐</button>
+          <input class="form-input" id="mcqOpt1" placeholder="Option 2"/>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button type="button" class="mcq-correct-btn" data-i="2" onclick="setMcqCorrect(2)">⭐</button>
+          <input class="form-input" id="mcqOpt2" placeholder="Option 3 (optional)"/>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button type="button" class="mcq-correct-btn" data-i="3" onclick="setMcqCorrect(3)">⭐</button>
+          <input class="form-input" id="mcqOpt3" placeholder="Option 4 (optional)"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeModal('mcqModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveMcqQuestion()">📨 Send Question</button>
     </div>
   </div>
 </div>
@@ -677,6 +751,97 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<!-- PHOTO PUZZLE GAME -->
+<div id="puzzleGame">
+  <div class="game-header">
+    <button class="game-back" onclick="closePuzzle()">← Back</button>
+    <div class="game-h-title">🧩 Photo Puzzle</div>
+    <div style="width:54px"></div>
+  </div>
+  <div class="puzzle-wrap">
+    <div id="puzzleStatus" style="text-align:center;font-size:14px;font-weight:600;color:var(--purple)"></div>
+    <div id="puzzleBoardWrap" style="display:none;flex-direction:column;align-items:center;gap:16px">
+      <div class="puzzle-grid" id="puzzleGrid"></div>
+      <button class="btn-secondary" onclick="document.getElementById('puzzlePhotoFile').click()">🔄 New Photo</button>
+    </div>
+    <div id="puzzleEmptyState" class="puzzle-empty-state">
+      <div style="font-size:50px;margin-bottom:10px">🧩</div>
+      <div style="font-weight:600;color:var(--text);margin-bottom:16px">Pick a photo together and piece it back into a perfect frame 💕<br/><span style="font-size:12px;color:var(--muted);font-weight:400">No scores here — just teamwork!</span></div>
+      <input type="file" id="puzzlePhotoFile" accept="image/*" style="display:none" onchange="choosePuzzlePhoto(event)"/>
+      <button class="btn-primary" onclick="document.getElementById('puzzlePhotoFile').click()">📷 Choose Photo</button>
+    </div>
+  </div>
+</div>
+
+<!-- EMOJI GUESS GAME -->
+<div id="emojiGame">
+  <div class="game-header">
+    <button class="game-back" onclick="closeEmoji()">← Back</button>
+    <div class="game-h-title">😄 Emoji Guess</div>
+    <button onclick="resetEmojiScores()" style="background:rgba(255,255,255,.2);border:none;border-radius:12px;padding:8px 12px;color:#fff;font-size:12px;cursor:pointer">Reset</button>
+  </div>
+  <div style="display:flex;justify-content:space-around;padding:10px 16px">
+    <div class="score-box" style="flex:1;margin:0 4px"><div class="score-name">Subham</div><div class="score-num" id="emojiS">0</div></div>
+    <div class="score-box" style="flex:1;margin:0 4px"><div class="score-name">Arpita</div><div class="score-num" id="emojiA">0</div></div>
+  </div>
+  <div id="emojiStatus" style="text-align:center;padding:4px;font-size:14px;font-weight:600;color:var(--purple)"></div>
+  <div class="emoji-display" id="emojiDisplay">❔</div>
+  <div id="emojiHostSection" style="display:none">
+    <div style="text-align:center;font-size:13px;color:var(--muted);padding:0 14px 8px">You know the answer: <b id="emojiAnswerText" style="color:var(--purple)"></b><br/>Wait for your partner to guess!</div>
+    <div id="emojiConfirmSection" style="display:none">
+      <div style="text-align:center;font-size:14px;font-weight:600;color:var(--text);padding:8px">Partner guessed: <span id="emojiPartnerGuess" style="color:var(--purple)"></span><br/>Correct?</div>
+      <div class="confirm-btns">
+        <button class="confirm-yes" onclick="confirmEmojiGuess(true)">✅ Yes!</button>
+        <button class="confirm-no" onclick="confirmEmojiGuess(false)">❌ No</button>
+      </div>
+    </div>
+  </div>
+  <div id="emojiGuesserSection" style="display:none">
+    <div style="text-align:center;font-size:13px;color:var(--muted);padding:4px 14px">What does this emoji mean? Take a guess!</div>
+    <div class="guess-input-wrap">
+      <input class="guess-input" id="emojiGuessInput" placeholder="Type your guess..." onkeydown="if(event.key==='Enter')submitEmojiGuess()"/>
+      <button class="btn-primary" style="padding:11px 16px;flex-shrink:0" onclick="submitEmojiGuess()">Send</button>
+    </div>
+  </div>
+  <div id="emojiStartSection" style="display:none;padding:10px 14px">
+    <button class="btn-primary" style="width:100%" onclick="startEmojiRound()">😄 New Round</button>
+  </div>
+</div>
+
+<!-- MCQ QUIZ GAME -->
+<div id="mcqGame">
+  <div class="game-header">
+    <button class="game-back" onclick="closeMcq()">← Back</button>
+    <div class="game-h-title">❓ Quiz Time</div>
+    <button onclick="resetMcqScores()" style="background:rgba(255,255,255,.2);border:none;border-radius:12px;padding:8px 12px;color:#fff;font-size:12px;cursor:pointer">Reset</button>
+  </div>
+  <div style="display:flex;justify-content:space-around;padding:10px 16px">
+    <div class="score-box" style="flex:1;margin:0 4px"><div class="score-name">Subham</div><div class="score-num" id="mcqS">0</div></div>
+    <div class="score-box" style="flex:1;margin:0 4px"><div class="score-name">Arpita</div><div class="score-num" id="mcqA">0</div></div>
+  </div>
+  <div style="flex:1;padding:6px 16px;overflow-y:auto">
+    <div id="mcqIdleSection" style="display:none;text-align:center;padding:30px 10px">
+      <div style="font-size:50px;margin-bottom:10px">❓</div>
+      <div style="color:var(--muted);margin-bottom:16px">Stump your partner with a question!</div>
+      <button class="btn-primary" onclick="openMcqCreate()">➕ Add Question</button>
+    </div>
+    <div id="mcqAnswerSection" style="display:none">
+      <div style="text-align:center;font-size:13px;color:var(--muted);font-weight:500;margin-bottom:4px" id="mcqQuestionCreator"></div>
+      <div style="text-align:center;padding:6px 4px 16px;font-size:17px;font-weight:700;color:var(--text)" id="mcqQuestionText"></div>
+      <div id="mcqOptionsList" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+    <div id="mcqWaitSection" style="display:none;text-align:center;padding:30px 10px">
+      <div style="font-size:32px">⏳</div>
+      <div style="font-size:15px;font-weight:600;color:var(--muted);margin-top:8px">Waiting for <span id="mcqWaitFor"></span> to answer...</div>
+    </div>
+    <div id="mcqResultSection" style="display:none;text-align:center;padding:20px 10px">
+      <div id="mcqResultIcon" style="font-size:50px"></div>
+      <div id="mcqResultText" style="font-size:15px;font-weight:700;margin-top:10px;color:var(--text);line-height:1.5"></div>
+      <button class="btn-primary" style="width:100%;margin-top:18px" onclick="openMcqCreate()">➕ Ask Another</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
 // ===== FIREBASE CONFIG =====
@@ -704,10 +869,15 @@ let rpsScores={Subham:0,Arpita:0};
 let rpsMyChoice=null, rpsTimerInt=null, rpsChooseTimer=null;
 let drawScores={Subham:0,Arpita:0};
 let drawCtx, drawColor='#1e1b4b', brushSize=4, drawHistory=[], isDrawing=false;
-let drawPhase='idle', drawRole='drawer', drawWord='';
+let drawPhase='idle', drawRole='drawer', drawWord='', drawNextDrawer='Subham';
+let puzzleOrder=null, puzzleSelected=null, puzzleImage='';
+const PUZZLE_SIZE=3;
+let emojiScores={Subham:0,Arpita:0}, emojiPhase='idle', emojiRole='guesser', emojiNextHost='Subham';
+let mcqScores={Subham:0,Arpita:0}, mcqCorrectIdx=0;
 let editingNoteId=null;
 // Realtime DB listeners (off functions)
 let memOff=null, notesOff=null, tttOff=null, rpsOff=null, drawOff=null, presenceOff=null;
+let puzzleOff=null, emojiOff=null, mcqOff=null;
 
 // ===== FIREBASE INIT =====
 async function initFirebase(){
@@ -1438,7 +1608,9 @@ function listenDraw(){
     drawPhase=d.phase||'idle';
     drawRole=d.drawer===currentUser?'drawer':'guesser';
     drawWord=d.word||'';
-    document.getElementById('drawStatus').textContent=drawPhase==='idle'?'Start a new round!':(drawPhase==='drawing'?(d.drawer===currentUser?'You are drawing':d.drawer+' is drawing...'):'Waiting...');
+    drawNextDrawer=d.nextDrawer||'Subham';
+    const turnText=drawNextDrawer===currentUser?'your turn to draw!':drawNextDrawer+"'s turn to draw next";
+    document.getElementById('drawStatus').textContent=(drawPhase==='idle'||drawPhase==='done')?('Start a new round — '+turnText):(drawPhase==='drawing'?(d.drawer===currentUser?'You are drawing':d.drawer+' is drawing...'):'Waiting...');
     document.getElementById('drawStartSection').style.display=(drawPhase==='idle'||drawPhase==='done')?'block':'none';
     document.getElementById('drawerSection').style.display=(drawPhase==='drawing'&&drawRole==='drawer')?'block':'none';
     document.getElementById('guesserSection').style.display=(drawPhase==='drawing'&&drawRole==='guesser')?'block':'none';
@@ -1458,15 +1630,16 @@ function listenDraw(){
   drawOff = ()=> ref.off('value', handler);
 }
 async function initDrawDB(){
-  await rtdb.ref('games/draw').set({phase:'idle',drawer:'Subham',guesser:'Arpita',word:'',canvasData:'',scores:{Subham:0,Arpita:0},currentGuess:null});
+  await rtdb.ref('games/draw').set({phase:'idle',drawer:'Subham',guesser:'Arpita',word:'',canvasData:'',scores:{Subham:0,Arpita:0},currentGuess:null,nextDrawer:'Subham'});
 }
 const drawWords=['cat','house','sun','tree','car','flower','moon','dog','fish','love','heart','star','cake','bird','book','phone','music','beach','mountain','rain'];
 async function startDrawRound(){
   const word=drawWords[Math.floor(Math.random()*drawWords.length)];
-  const partner=currentUser==='Subham'?'Arpita':'Subham';
+  const drawer=drawNextDrawer||'Subham';
+  const partner=drawer==='Subham'?'Arpita':'Subham';
   clearCanvas();
-  await rtdb.ref('games/draw').update({phase:'drawing',drawer:currentUser,guesser:partner,word,canvasData:'',currentGuess:null});
-  showToast('\u{1f3a8}','New round! You draw: '+word);
+  await rtdb.ref('games/draw').update({phase:'drawing',drawer,guesser:partner,word,canvasData:'',currentGuess:null});
+  showToast('\u{1f3a8}','New round! '+(drawer===currentUser?'You draw: '+word:drawer+' is drawing now'));
 }
 async function submitGuess(){
   const g=document.getElementById('guessInput').value.trim();
@@ -1481,7 +1654,7 @@ async function confirmGuess(correct){
   if(correct){
     const newScores={...drawScores};
     newScores[data.guesser]=(newScores[data.guesser]||0)+1;
-    await rtdb.ref('games/draw').update({phase:'done',scores:newScores,currentGuess:null});
+    await rtdb.ref('games/draw').update({phase:'done',scores:newScores,currentGuess:null,nextDrawer:data.guesser});
     showToast('\u{1f389}',data.guesser+' guessed correctly!');
     confetti();
   } else {
@@ -1492,6 +1665,251 @@ async function confirmGuess(correct){
 async function resetDrawScores(){
   if(!confirm('Reset scores?'))return;
   await rtdb.ref('games/draw').update({scores:{Subham:0,Arpita:0}});
+}
+
+// ===== PHOTO PUZZLE =====
+function openPuzzle(){document.getElementById('puzzleGame').classList.add('open');listenPuzzle()}
+function closePuzzle(){document.getElementById('puzzleGame').classList.remove('open');if(puzzleOff){puzzleOff();puzzleOff=null}}
+function defaultPuzzleOrder(){return Array.from({length:PUZZLE_SIZE*PUZZLE_SIZE},(_,i)=>i)}
+function listenPuzzle(){
+  if(!rtdb)return;
+  if(puzzleOff){puzzleOff();puzzleOff=null}
+  const ref=rtdb.ref('games/puzzle');
+  const handler=ref.on('value',snap=>{
+    if(!snap.exists()||!snap.val().image){renderPuzzleEmpty();return}
+    const d=snap.val();
+    puzzleImage=d.image;
+    puzzleOrder=d.order||defaultPuzzleOrder();
+    renderPuzzleBoard(!!d.solved);
+  });
+  puzzleOff=()=>ref.off('value',handler);
+}
+function renderPuzzleEmpty(){
+  document.getElementById('puzzleEmptyState').style.display='block';
+  document.getElementById('puzzleBoardWrap').style.display='none';
+  document.getElementById('puzzleStatus').textContent='';
+}
+function renderPuzzleBoard(solved){
+  document.getElementById('puzzleEmptyState').style.display='none';
+  document.getElementById('puzzleBoardWrap').style.display='flex';
+  document.getElementById('puzzleStatus').textContent=solved?'\u{1f389} You did it together!':'Tap two pieces to swap them';
+  const grid=document.getElementById('puzzleGrid');
+  const n=PUZZLE_SIZE;
+  grid.style.gridTemplateColumns='repeat('+n+',1fr)';
+  grid.innerHTML='';
+  puzzleOrder.forEach((pieceIdx,slot)=>{
+    const tile=document.createElement('div');
+    tile.className='puzzle-tile'+(puzzleSelected===slot?' selected':'');
+    const row=Math.floor(pieceIdx/n), col=pieceIdx%n;
+    tile.style.backgroundImage='url('+puzzleImage+')';
+    tile.style.backgroundSize=(n*100)+'% '+(n*100)+'%';
+    tile.style.backgroundPosition=(n>1?(col/(n-1)*100):0)+'% '+(n>1?(row/(n-1)*100):0)+'%';
+    if(!solved) tile.onclick=()=>tapPuzzleTile(slot);
+    grid.appendChild(tile);
+  });
+}
+function tapPuzzleTile(slot){
+  if(puzzleSelected===null){puzzleSelected=slot;renderPuzzleBoard(false);return}
+  if(puzzleSelected===slot){puzzleSelected=null;renderPuzzleBoard(false);return}
+  const newOrder=[...puzzleOrder];
+  const tmp=newOrder[puzzleSelected]; newOrder[puzzleSelected]=newOrder[slot]; newOrder[slot]=tmp;
+  puzzleSelected=null;
+  const solved=newOrder.every((v,i)=>v===i);
+  rtdb.ref('games/puzzle').update({order:newOrder,solved}).catch(()=>{});
+  if(solved){ showToast('\u{1f389}','Puzzle complete! Perfect together \u{1f495}'); confetti(); }
+}
+async function choosePuzzlePhoto(e){
+  const f=e.target.files[0]; if(!f){return}
+  showProgress();
+  try{
+    const dataUrl=await compressImage(f,480,0.7);
+    let order=defaultPuzzleOrder();
+    let solvedByChance=true;
+    while(solvedByChance){
+      for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=order[i];order[i]=order[j];order[j]=t}
+      solvedByChance=order.every((v,i)=>v===i);
+    }
+    await rtdb.ref('games/puzzle').set({image:dataUrl,order,solved:false,addedBy:currentUser});
+    hideProgress();
+    showToast('\u{1f9e9}',currentUser+' started a new puzzle!');
+  }catch(err){
+    hideProgress();
+    showToast('\u274c','Error: '+err.message);
+  }
+  e.target.value='';
+}
+
+// ===== EMOJI GUESS =====
+const emojiWords=[
+  {name:'Pizza',emoji:'\u{1f355}'},{name:'Rainbow',emoji:'\u{1f308}'},{name:'Birthday',emoji:'\u{1f382}'},
+  {name:'Cricket',emoji:'\u{1f3cf}'},{name:'Beach',emoji:'\u{1f3d6}\ufe0f'},{name:'Coffee',emoji:'\u2615'},
+  {name:'Rain',emoji:'\u{1f327}\ufe0f'},{name:'Ice Cream',emoji:'\u{1f366}'},{name:'Butterfly',emoji:'\u{1f98b}'},
+  {name:'Guitar',emoji:'\u{1f3b8}'},{name:'Camera',emoji:'\u{1f4f7}'},{name:'Football',emoji:'\u26bd'},
+  {name:'Wedding',emoji:'\u{1f48d}'},{name:'Sunflower',emoji:'\u{1f33b}'},{name:'Chocolate',emoji:'\u{1f36b}'},
+  {name:'Train',emoji:'\u{1f682}'},{name:'Mountain',emoji:'\u{1f3d4}\ufe0f'},{name:'Puppy',emoji:'\u{1f436}'},
+  {name:'Kitten',emoji:'\u{1f431}'},{name:'Garden',emoji:'\u{1f33a}'},{name:'Bicycle',emoji:'\u{1f6b2}'},
+  {name:'Fireworks',emoji:'\u{1f386}'},{name:'Picnic',emoji:'\u{1f9fa}'},{name:'Umbrella',emoji:'\u2602\ufe0f'},
+  {name:'Snowman',emoji:'\u26c4'},{name:'Castle',emoji:'\u{1f3f0}'},{name:'Night Sky',emoji:'\u{1f30c}'},
+  {name:'Cake',emoji:'\u{1f370}'},{name:'Sunset',emoji:'\u{1f305}'},{name:'Movie Night',emoji:'\u{1f37f}\u{1f3ac}'}
+];
+function openEmoji(){document.getElementById('emojiGame').classList.add('open');listenEmoji()}
+function closeEmoji(){document.getElementById('emojiGame').classList.remove('open');if(emojiOff){emojiOff();emojiOff=null}}
+function listenEmoji(){
+  if(!rtdb)return;
+  if(emojiOff){emojiOff();emojiOff=null}
+  const ref=rtdb.ref('games/emoji');
+  const handler=ref.on('value',snap=>{
+    if(!snap.exists()){initEmojiDB();return}
+    const d=snap.val();
+    emojiScores=d.scores||{Subham:0,Arpita:0};
+    document.getElementById('emojiS').textContent=emojiScores.Subham||0;
+    document.getElementById('emojiA').textContent=emojiScores.Arpita||0;
+    emojiPhase=d.phase||'idle';
+    emojiNextHost=d.nextHost||'Subham';
+    emojiRole=d.host===currentUser?'host':'guesser';
+    const turnText=emojiNextHost===currentUser?'your turn to host!':emojiNextHost+"'s turn to host next";
+    document.getElementById('emojiStatus').textContent=(emojiPhase==='idle'||emojiPhase==='done')?('Start a new round — '+turnText):(emojiPhase==='showing'?(d.host===currentUser?'You know the word!':d.host+' knows the word...'):'');
+    document.getElementById('emojiStartSection').style.display=(emojiPhase==='idle'||emojiPhase==='done')?'block':'none';
+    document.getElementById('emojiHostSection').style.display=(emojiPhase==='showing'&&emojiRole==='host')?'block':'none';
+    document.getElementById('emojiGuesserSection').style.display=(emojiPhase==='showing'&&emojiRole==='guesser')?'block':'none';
+    document.getElementById('emojiDisplay').textContent=emojiPhase==='showing'?(d.emoji||''):'\u2754';
+    if(emojiPhase==='showing'&&emojiRole==='host'){
+      document.getElementById('emojiAnswerText').textContent=d.name||'';
+      const g=d.currentGuess;
+      document.getElementById('emojiConfirmSection').style.display=g?'block':'none';
+      if(g) document.getElementById('emojiPartnerGuess').textContent=g;
+    }
+  });
+  emojiOff=()=>ref.off('value',handler);
+}
+async function initEmojiDB(){
+  await rtdb.ref('games/emoji').set({phase:'idle',host:'Subham',guesser:'Arpita',nextHost:'Subham',name:'',emoji:'',currentGuess:null,scores:{Subham:0,Arpita:0}});
+}
+async function startEmojiRound(){
+  const pick=emojiWords[Math.floor(Math.random()*emojiWords.length)];
+  const host=emojiNextHost||'Subham';
+  const guesser=host==='Subham'?'Arpita':'Subham';
+  await rtdb.ref('games/emoji').update({phase:'showing',host,guesser,name:pick.name,emoji:pick.emoji,currentGuess:null});
+  showToast('\u{1f604}','New round! '+(host===currentUser?'Your partner is guessing your emoji':host+' is hosting now'));
+}
+async function submitEmojiGuess(){
+  const g=document.getElementById('emojiGuessInput').value.trim();
+  if(!g)return;
+  await rtdb.ref('games/emoji').update({currentGuess:g});
+  document.getElementById('emojiGuessInput').value='';
+  showToast('\u{1f4ac}','Guess sent!');
+}
+async function confirmEmojiGuess(correct){
+  const snap=await rtdb.ref('games/emoji').get();
+  const data=snap.val();
+  if(correct){
+    const newScores={...emojiScores};
+    newScores[data.guesser]=(newScores[data.guesser]||0)+1;
+    await rtdb.ref('games/emoji').update({phase:'done',scores:newScores,currentGuess:null,nextHost:data.guesser});
+    showToast('\u{1f389}',data.guesser+' guessed correctly!');
+    confetti();
+  } else {
+    await rtdb.ref('games/emoji').update({currentGuess:null});
+    showToast('\u274c','Wrong guess! Try again!');
+  }
+}
+async function resetEmojiScores(){
+  if(!confirm('Reset scores?'))return;
+  await rtdb.ref('games/emoji').update({scores:{Subham:0,Arpita:0}});
+}
+
+// ===== MCQ QUIZ =====
+function openMcq(){document.getElementById('mcqGame').classList.add('open');listenMcq()}
+function closeMcq(){document.getElementById('mcqGame').classList.remove('open');if(mcqOff){mcqOff();mcqOff=null}}
+function listenMcq(){
+  if(!rtdb)return;
+  if(mcqOff){mcqOff();mcqOff=null}
+  const ref=rtdb.ref('games/mcq');
+  const handler=ref.on('value',snap=>{
+    if(!snap.exists()){initMcqDB();return}
+    const d=snap.val();
+    mcqScores=d.scores||{Subham:0,Arpita:0};
+    document.getElementById('mcqS').textContent=mcqScores.Subham||0;
+    document.getElementById('mcqA').textContent=mcqScores.Arpita||0;
+    renderMcqState(d);
+  });
+  mcqOff=()=>ref.off('value',handler);
+}
+async function initMcqDB(){
+  await rtdb.ref('games/mcq').set({phase:'idle',scores:{Subham:0,Arpita:0}});
+}
+function renderMcqState(d){
+  const idleS=document.getElementById('mcqIdleSection'),ansS=document.getElementById('mcqAnswerSection'),waitS=document.getElementById('mcqWaitSection'),resS=document.getElementById('mcqResultSection');
+  idleS.style.display='none'; ansS.style.display='none'; waitS.style.display='none'; resS.style.display='none';
+  const phase=d.phase||'idle';
+  if(phase==='idle'){ idleS.style.display='block'; return; }
+  if(phase==='pending'){
+    if(d.createdBy===currentUser){
+      waitS.style.display='block';
+      document.getElementById('mcqWaitFor').textContent=d.answerer||(d.createdBy==='Subham'?'Arpita':'Subham');
+    } else {
+      ansS.style.display='block';
+      document.getElementById('mcqQuestionCreator').textContent=d.createdBy+' asks:';
+      document.getElementById('mcqQuestionText').textContent=d.question;
+      const list=document.getElementById('mcqOptionsList');
+      list.innerHTML='';
+      (d.options||[]).forEach((opt,i)=>{
+        if(!opt) return;
+        const b=document.createElement('button');
+        b.className='mcq-option-btn'; b.textContent=opt; b.type='button';
+        b.onclick=()=>answerMcq(i);
+        list.appendChild(b);
+      });
+    }
+    return;
+  }
+  if(phase==='answered'){
+    resS.style.display='block';
+    const correct=d.selectedIndex===d.correctIndex;
+    document.getElementById('mcqResultIcon').textContent=correct?'\u{1f389}':'\u{1f605}';
+    const opts=d.options||[];
+    document.getElementById('mcqResultText').textContent=d.answerer+(correct?' got it right! +1 point \u{1f389}':' answered wrong.')+' Correct answer: '+opts[d.correctIndex];
+  }
+}
+function openMcqCreate(){
+  document.getElementById('mcqQInput').value='';
+  ['0','1','2','3'].forEach(i=>document.getElementById('mcqOpt'+i).value='');
+  mcqCorrectIdx=0;
+  document.querySelectorAll('.mcq-correct-btn').forEach(b=>b.classList.toggle('active',b.dataset.i==='0'));
+  openModal('mcqModal');
+}
+function setMcqCorrect(i){
+  mcqCorrectIdx=i;
+  document.querySelectorAll('.mcq-correct-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.i)===i));
+}
+async function saveMcqQuestion(){
+  const q=document.getElementById('mcqQInput').value.trim();
+  const opts=['0','1','2','3'].map(i=>document.getElementById('mcqOpt'+i).value.trim());
+  const filled=opts.filter(o=>o);
+  if(!q){showToast('\u26a0\ufe0f','Please add a question!');return}
+  if(filled.length<2){showToast('\u26a0\ufe0f','Add at least 2 options!');return}
+  if(!opts[mcqCorrectIdx]){showToast('\u26a0\ufe0f','Pick a filled option as the correct one!');return}
+  const partner=currentUser==='Subham'?'Arpita':'Subham';
+  await rtdb.ref('games/mcq').set({
+    phase:'pending', question:q, options:opts, correctIndex:mcqCorrectIdx,
+    createdBy:currentUser, answerer:partner, selectedIndex:null, scores:mcqScores
+  });
+  closeModal('mcqModal');
+  showToast('\u{1f4e8}','Question sent to '+partner+'!');
+}
+async function answerMcq(i){
+  const snap=await rtdb.ref('games/mcq').get();
+  const d=snap.val();
+  if(!d||d.phase!=='pending')return;
+  const correct=i===d.correctIndex;
+  const newScores={...mcqScores};
+  if(correct) newScores[currentUser]=(newScores[currentUser]||0)+1;
+  await rtdb.ref('games/mcq').update({phase:'answered',selectedIndex:i,scores:newScores});
+  if(correct){ showToast('\u{1f389}','Correct! +1 point'); confetti(); } else { showToast('\u274c','Not quite!'); }
+}
+async function resetMcqScores(){
+  if(!confirm('Reset scores?'))return;
+  await rtdb.ref('games/mcq').update({scores:{Subham:0,Arpita:0}});
 }
 
 // ===== PROFILE =====
@@ -1505,7 +1923,7 @@ function updateProfileStats(){
   const notes=notesData.filter(n=>n.createdBy===currentUser).length;
   document.getElementById('statPhotos').textContent=photos;
   document.getElementById('statNotes').textContent=notes;
-  const wins=(tttScores[currentUser]||0)+(rpsScores[currentUser]||0)+(drawScores[currentUser]||0);
+  const wins=(tttScores[currentUser]||0)+(rpsScores[currentUser]||0)+(drawScores[currentUser]||0)+(emojiScores[currentUser]||0)+(mcqScores[currentUser]||0);
   document.getElementById('statWins').textContent=wins;
 }
 function doLogout(){
@@ -1519,6 +1937,9 @@ function doLogout(){
   if(tttOff){ tttOff(); tttOff=null; }
   if(rpsOff){ rpsOff(); rpsOff=null; }
   if(drawOff){ drawOff(); drawOff=null; }
+  if(puzzleOff){ puzzleOff(); puzzleOff=null; }
+  if(emojiOff){ emojiOff(); emojiOff=null; }
+  if(mcqOff){ mcqOff(); mcqOff=null; }
   document.getElementById('homePage').classList.remove('active');
   document.getElementById('loginPage').classList.add('active');
   document.getElementById('pwInput').value='';
@@ -1536,6 +1957,10 @@ async function loadGameScores(){
     if(rps.exists()) rpsScores=rps.val().scores||{Subham:0,Arpita:0};
     const draw=await rtdb.ref('games/draw').get();
     if(draw.exists()) drawScores=draw.val().scores||{Subham:0,Arpita:0};
+    const emoji=await rtdb.ref('games/emoji').get();
+    if(emoji.exists()) emojiScores=emoji.val().scores||{Subham:0,Arpita:0};
+    const mcq=await rtdb.ref('games/mcq').get();
+    if(mcq.exists()) mcqScores=mcq.val().scores||{Subham:0,Arpita:0};
     refreshGameBadges();
   }catch(e){ console.error('loadGameScores:',e); }
 }
@@ -1543,6 +1968,8 @@ function refreshGameBadges(){
   document.getElementById('tttBadge').textContent=(tttScores.Subham||0)+'-'+(tttScores.Arpita||0);
   document.getElementById('rpsBadge').textContent=(rpsScores.Subham||0)+'-'+(rpsScores.Arpita||0);
   document.getElementById('drawBadge').textContent=(drawScores.Subham||0)+'-'+(drawScores.Arpita||0);
+  document.getElementById('emojiBadge').textContent=(emojiScores.Subham||0)+'-'+(emojiScores.Arpita||0);
+  document.getElementById('mcqBadge').textContent=(mcqScores.Subham||0)+'-'+(mcqScores.Arpita||0);
 }
 
 // ===== UTILS =====
@@ -1596,6 +2023,11 @@ window.doLogout=doLogout;window.openModal=openModal;window.closeModal=closeModal
 window.setColor=setColor;window.setBrush=setBrush;
 window.undoDrawing=undoDrawing;window.pinNote=pinNote;window.openNote=openNote;
 window.startRPS=startRPS;window.resetRPSScores=resetRPSScores;
+window.openPuzzle=openPuzzle;window.closePuzzle=closePuzzle;window.choosePuzzlePhoto=choosePuzzlePhoto;
+window.openEmoji=openEmoji;window.closeEmoji=closeEmoji;window.startEmojiRound=startEmojiRound;
+window.submitEmojiGuess=submitEmojiGuess;window.confirmEmojiGuess=confirmEmojiGuess;window.resetEmojiScores=resetEmojiScores;
+window.openMcq=openMcq;window.closeMcq=closeMcq;window.openMcqCreate=openMcqCreate;
+window.setMcqCorrect=setMcqCorrect;window.saveMcqQuestion=saveMcqQuestion;window.answerMcq=answerMcq;window.resetMcqScores=resetMcqScores;
 })();
 </script>
 </body>
