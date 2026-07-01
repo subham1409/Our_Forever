@@ -1961,31 +1961,103 @@ async function resetMcqScores(){
 
 // ===== ENGLISH QUIZ =====
 const ENG_QUESTIONS=[
-  {q:"What is the synonym of 'Happy'?",o:["Joyful","Angry","Tired","Sad"],c:0},
-  {q:"What is the opposite of 'Brave'?",o:["Strong","Cowardly","Bold","Fearless"],c:1},
-  {q:"Choose the correct sentence:",o:["She don't like tea","She doesn't likes tea","She doesn't like tea","She not like tea"],c:2},
-  {q:"What is the plural of 'Child'?",o:["Childs","Children","Childes","Childer"],c:1},
-  {q:"What is the synonym of 'Beautiful'?",o:["Ugly","Pretty","Dull","Plain"],c:1},
-  {q:"What is the past tense of 'Go'?",o:["Goed","Gone","Went","Going"],c:2},
-  {q:"Which word is a noun?",o:["Quickly","Run","Happiness","Beautiful"],c:2},
-  {q:"What is the opposite of 'Difficult'?",o:["Hard","Easy","Tough","Complex"],c:1},
-  {q:"Choose the correctly spelled word:",o:["Recieve","Receive","Receeve","Receve"],c:1},
-  {q:"What is the synonym of 'Big'?",o:["Tiny","Small","Large","Little"],c:2},
-  {q:"Fill in the blank: She ___ to school every day.",o:["go","goes","going","gone"],c:1},
-  {q:"What is the opposite of 'Begin'?",o:["Start","End","Open","Continue"],c:1},
-  {q:"Which is the correct article: '___ apple'?",o:["A","An","The only","No article"],c:1},
-  {q:"What is the synonym of 'Quick'?",o:["Slow","Fast","Lazy","Late"],c:1},
-  {q:"What is the plural of 'Mouse' (animal)?",o:["Mouses","Mices","Mice","Mouse"],c:2},
+  // ── TENSES ──
+  {q:"Fill in: She ___ to school every day.",o:["go","goes","going","gone"],c:1},
+  {q:"Fill in: They ___ football right now.",o:["play","plays","are playing","played"],c:2},
+  {q:"Fill in: I ___ my homework before dinner yesterday.",o:["finish","finished","have finished","will finish"],c:1},
+  {q:"Fill in: By next year, she ___ here for a decade.",o:["will work","is working","will have worked","has worked"],c:2},
+  {q:"Fill in: He ___ TV when the phone rang.",o:["watches","watched","was watching","has watched"],c:2},
+  {q:"Fill in: I have ___ to Paris twice.",o:["go","went","been","gone"],c:2},
+  {q:"Fill in: She ___ the report by the time the boss arrived.",o:["finishes","finished","had finished","will finish"],c:2},
+  {q:"Fill in: We ___ dinner at 8 p.m. tonight.",o:["have","are having","had","will had"],c:1},
+  {q:"Fill in: She ___ here since 2015.",o:["lives","lived","has lived","had lived"],c:2},
+  {q:"Fill in: The sun ___ in the east.",o:["rise","rises","is rising","rose"],c:1},
+  {q:"Which sentence is correct?",o:["I am knowing her","I know her","I am know her","I knows her"],c:1},
+  {q:"Fill in: By the time you arrive, I ___ cooking.",o:["will finish","am finishing","will have finished","finish"],c:2},
+
+  // ── ARTICLES ──
+  {q:"Fill in: She is ___ honest woman.",o:["a","an","the","—"],c:1},
+  {q:"Fill in: I saw ___ movie last night. ___ movie was great.",o:["a / The","an / A","the / The","a / A"],c:0},
+  {q:"Fill in: He plays ___ guitar every evening.",o:["a","an","the","—"],c:2},
+  {q:"Fill in: ___ Mount Everest is the highest mountain.",o:["A","An","The","—"],c:3},
+  {q:"Fill in: She is ___ engineer.",o:["a","an","the","—"],c:1},
+  {q:"Fill in: Can you pass me ___ salt, please?",o:["a","an","the","—"],c:2},
+  {q:"Fill in: I have ___ umbrella in my bag.",o:["a","an","the","—"],c:1},
+  {q:"Fill in: ___ honesty is the best policy.",o:["A","An","The","—"],c:3},
+
+  // ── PREPOSITIONS ──
+  {q:"Fill in: She arrived ___ Monday morning.",o:["in","on","at","by"],c:1},
+  {q:"Fill in: The meeting is ___ 3 p.m.",o:["in","on","at","by"],c:2},
+  {q:"Fill in: He has lived here ___ five years.",o:["since","for","from","during"],c:1},
+  {q:"Fill in: She has been waiting ___ 9 o'clock.",o:["for","since","from","until"],c:1},
+  {q:"Fill in: The cat jumped ___ the table.",o:["on","onto","into","above"],c:1},
+  {q:"Fill in: We arrived ___ the airport at noon.",o:["in","at","on","to"],c:1},
+  {q:"Fill in: She is good ___ mathematics.",o:["in","on","at","with"],c:2},
+  {q:"Fill in: He is interested ___ learning English.",o:["in","on","at","for"],c:0},
+
+  // ── SUBJECT-VERB AGREEMENT ──
+  {q:"Choose the correct sentence:",o:["She don't like tea","She doesn't like tea","She not like tea","She doesn't likes tea"],c:1},
   {q:"Choose the correct sentence:",o:["He are my friend","He am my friend","He is my friend","He be my friend"],c:2},
-  {q:"What is the opposite of 'Open'?",o:["Close","Wide","Big","Free"],c:0},
-  {q:"What is the synonym of 'Smart'?",o:["Dull","Clever","Slow","Weak"],c:1},
-  {q:"Which word means 'a person who teaches'?",o:["Student","Teacher","Doctor","Driver"],c:1},
-  {q:"What is the past tense of 'Eat'?",o:["Eated","Ate","Eaten","Eating"],c:1},
-  {q:"What is the opposite of 'Hot'?",o:["Warm","Cold","Mild","Cool breeze"],c:1},
-  {q:"Choose the correct word: I have ___ idea.",o:["a","an","the","no article"],c:1},
-  {q:"What is the synonym of 'Sad'?",o:["Happy","Excited","Unhappy","Cheerful"],c:2},
-  {q:"What is the plural of 'Leaf'?",o:["Leafs","Leaves","Leafes","Leaf"],c:1},
-  {q:"What is the opposite of 'Always'?",o:["Often","Never","Usually","Sometimes"],c:1},
+  {q:"Choose the correct sentence:",o:["The team are winning","The team is winning","The team be winning","The team were winning today"],c:1},
+  {q:"Fill in: Neither of the students ___ ready.",o:["are","were","is","be"],c:2},
+  {q:"Fill in: Everyone ___ to leave on time.",o:["want","wants","are wanting","have wanted"],c:1},
+  {q:"Fill in: The news ___ surprising.",o:["are","were","is","be"],c:2},
+  {q:"Fill in: Mathematics ___ my favourite subject.",o:["are","were","is","have been"],c:2},
+  {q:"Fill in: A number of students ___ absent today.",o:["is","was","are","has been"],c:2},
+
+  // ── CONDITIONALS ──
+  {q:"Fill in (1st conditional): If it rains, she ___ an umbrella.",o:["brings","brought","will bring","would bring"],c:2},
+  {q:"Fill in (2nd conditional): If I ___ rich, I would travel the world.",o:["am","was","were","will be"],c:2},
+  {q:"Fill in (3rd conditional): If she had studied, she ___ the exam.",o:["would pass","will pass","would have passed","passes"],c:2},
+  {q:"Which is a zero conditional sentence?",o:["If it rains, I'll stay home","If it rains, I stayed home","If water boils, it evaporates","If water boiled, it would evaporate"],c:2},
+  {q:"Fill in: Unless you hurry, you ___ the bus.",o:["miss","will miss","would miss","missed"],c:1},
+
+  // ── PASSIVE VOICE ──
+  {q:"Change to passive: 'Tom writes the letter.'",o:["The letter is written by Tom","The letter was written by Tom","The letter written by Tom","Tom is written the letter"],c:0},
+  {q:"Change to passive: 'They built this house in 1990.'",o:["This house is built in 1990","This house was built in 1990","This house were built in 1990","This house built in 1990"],c:1},
+  {q:"Choose the correct passive sentence:",o:["The cake was eating by her","The cake was eaten by her","The cake is ate by her","The cake eaten by her"],c:1},
+  {q:"Fill in: The report ___ by the manager tomorrow.",o:["will write","will be written","is written","was writing"],c:1},
+  {q:"Fill in: English ___ all over the world.",o:["speaks","is speaking","is spoken","was speaking"],c:2},
+
+  // ── MODALS ──
+  {q:"Fill in: You ___ smoke here — it's not allowed.",o:["mustn't","shouldn't","couldn't","mightn't"],c:0},
+  {q:"Fill in: She ___ speak three languages when she was ten.",o:["can","could","may","might"],c:1},
+  {q:"Fill in: You ___ see a doctor — that cough sounds bad.",o:["must","can","shall","will"],c:0},
+  {q:"Fill in: It ___ rain later — the sky looks dark.",o:["will","must","might","shall"],c:2},
+  {q:"Fill in: ___ I open the window?",o:["Will","Would","Shall","Should"],c:2},
+  {q:"Fill in: She ___ have left — her coat is still here.",o:["can't","mustn't","wouldn't","shouldn't"],c:0},
+
+  // ── REPORTED SPEECH ──
+  {q:"Reported speech: He said, 'I am tired.' →",o:["He said he is tired","He said he was tired","He told he was tired","He says he was tired"],c:1},
+  {q:"Reported speech: She asked, 'Are you coming?' →",o:["She asked if I was coming","She asked if I am coming","She asked am I coming","She told if I was coming"],c:0},
+  {q:"Reported speech: He said, 'I will help you.' →",o:["He said he will help me","He said he would help me","He told he will help me","He said he helped me"],c:1},
+
+  // ── QUESTION TAGS ──
+  {q:"Choose the correct tag: 'You don't like coffee, ___?'",o:["do you","don't you","did you","won't you"],c:0},
+  {q:"Choose the correct tag: 'She is coming, ___?'",o:["is she","isn't she","wasn't she","doesn't she"],c:1},
+  {q:"Choose the correct tag: 'They haven't left, ___?'",o:["haven't they","have they","don't they","did they"],c:1},
+  {q:"Choose the correct tag: 'Let's go out, ___?'",o:["will we","shall we","don't we","won't we"],c:1},
+
+  // ── COMPARATIVES & SUPERLATIVES ──
+  {q:"What is the comparative of 'Good'?",o:["Gooder","Better","Best","More good"],c:1},
+  {q:"What is the superlative of 'Happy'?",o:["Happiest","Most happy","Happier","Happyest"],c:0},
+  {q:"Fill in: This is ___ book I have ever read.",o:["a good","the best","a better","the better"],c:1},
+  {q:"Fill in: She is ___ than her sister.",o:["tall","taller","tallest","more tall"],c:1},
+  {q:"Fill in: The more you practise, ___ you get.",o:["more better","the better","the best","better"],c:1},
+
+  // ── GERUNDS & INFINITIVES ──
+  {q:"Fill in: She enjoys ___ to music.",o:["listen","to listen","listening","listened"],c:2},
+  {q:"Fill in: He decided ___ a new job.",o:["finding","to find","find","found"],c:1},
+  {q:"Fill in: I am looking forward to ___ you.",o:["meet","to meet","met","meeting"],c:3},
+  {q:"Fill in: They suggested ___ the meeting.",o:["postpone","to postpone","postponed","postponing"],c:3},
+  {q:"Fill in: She stopped ___ (she no longer smokes).",o:["to smoke","smoke","smokes","smoking"],c:3},
+  {q:"Fill in: He stopped ___ a taxi (he paused in order to get one).",o:["getting","to get","get","got"],c:1},
+
+  // ── CONJUNCTIONS ──
+  {q:"Fill in: She was tired, ___ she kept working.",o:["so","but","because","therefore"],c:1},
+  {q:"Fill in: I will call you ___ I arrive.",o:["until","when","while","during"],c:1},
+  {q:"Fill in: He studied hard ___ he could pass the exam.",o:["so that","because","although","however"],c:0},
+  {q:"Fill in: ___ it was raining, we went for a walk.",o:["Because","So","Although","Therefore"],c:2},
 ];
 function openEnglish(){document.getElementById('engGame').classList.add('open');listenEnglish()}
 function closeEnglish(){
